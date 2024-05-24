@@ -100,6 +100,7 @@ static inline u64 scale_exec_time(u64 delta, struct rq *rq)
 
 static DEFINE_SPINLOCK(jankinfo_update_time_info_last_calltime_lock);
 u64 jankinfo_update_time_info_last_calltime;
+extern bool jankinfo_init;
 void jankinfo_update_time_info(struct rq *rq,
 				struct task_struct *p, u64 time)
 {
@@ -117,6 +118,9 @@ void jankinfo_update_time_info(struct rq *rq,
 	u64 calldelta;
 
 	if (!p)
+		return;
+
+	if (unlikely(jankinfo_init == false))
 		return;
 
 	cpu = p->cpu;

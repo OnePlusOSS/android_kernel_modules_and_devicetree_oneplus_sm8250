@@ -86,6 +86,13 @@ const struct dev_pm_ops qpnp_pm_ops;
 struct qpnp_pon *sys_reset_dev;
 EXPORT_SYMBOL(sys_reset_dev);
 
+static int raise_wdt_issue(void) {
+        pr_info("%s wdt issue begin!\n", __func__);
+        preempt_disable();
+        local_irq_disable();
+        while (1);
+}
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
 #define PON_GEN3_PBS                            0x08
 #define PON_GEN3_HLOS                           0x09
@@ -231,6 +238,10 @@ static ssize_t pmicwd_proc_read(struct file *file, char __user *buf,
 }
 
 #define BUFF_SIZE 64
+#define MAX_SYMBOL_LEN 64
+
+static char symbol[MAX_SYMBOL_LEN]={"DISABLE"};
+
 static ssize_t pmicwd_proc_write(struct file *file, const char __user *buf,
 		size_t count,loff_t *off)
 {
@@ -258,6 +269,16 @@ static ssize_t pmicwd_proc_write(struct file *file, const char __user *buf,
 		dev_err(pon->dev, "%s: read proc input error.\n", __func__);
 		return count;
     }
+
+        /*simulate abnormal PMIC into dump */
+        snprintf(symbol, sizeof(symbol), "%s", buffer);
+        symbol[count-1] = 0;
+        if (!strcmp(symbol, "ENABLE_SUSPEND")||!strcmp(symbol, "ENABLE_RESUME")) {
+                return count;
+        }
+        if (!strcmp(symbol, "ENABLE_WDT")) {
+                raise_wdt_issue();
+        }
 
 	/* validate the length of each of the 3 parts */
 	start = buffer;
@@ -359,13 +380,24 @@ static int pmicWd_pm_notifier(struct notifier_block *nb,
 	switch (event) {
 	case PM_SUSPEND_PREPARE:
 		pon->suspend_state = 0x80 ;
+                if (!strcmp(symbol, "ENABLE_SUSPEND")) {
+                        pr_info("%s the phone will enter into dump\n", __func__);
+                        while (1);
+                }
 		pr_info("pmicwd start suspend\n");
 		break;
 
 	case PM_POST_SUSPEND:
+                if (!strcmp(symbol, "ENABLE_RESUME")) {
+                pr_info("%s the phone will enter into dump\n\n", __func__);
+                while (1);
+                }
 		pon->suspend_state = 0;
 		pr_info("pmicwd finish resume\n");
 		break;
+
+        default:
+                pr_info("Unknown event type\n");
 	}
 
 	return NOTIFY_DONE;
@@ -629,6 +661,11 @@ static int qpnp_resume(struct device *dev)
 	//disable alarm
 	setalarm(0,false);
 	qpnp_pon_wd_pet();
+        if (!strcmp(symbol, "ENABLE_RESUME")) {
+                pr_info("%s the phone will enter into dump\n\n", __func__);
+                while (1);
+        }
+
 	return 0;
 }
 

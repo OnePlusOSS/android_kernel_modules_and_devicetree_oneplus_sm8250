@@ -1446,7 +1446,7 @@ void reg_dmav1_setup_dspp_pccv4(struct sde_hw_dspp *ctx, void *cfg)
 		if (display->panel->oplus_priv.dc_apollo_sync_enable) {
 			mutex_lock(&dc_apollo.lock);
 			if (pcc_cfg_last && pcc_cfg) {
-				pr_err("pcc(%d,%d)\n", dc_apollo.pcc_current, dc_apollo.pcc_last);
+				DRM_DEBUG_DRIVER("pcc(%d,%d)\n", dc_apollo.pcc_current, dc_apollo.pcc_last);
 				if (dc_apollo.pcc_last != dc_apollo.pcc_current) {
 					dc_apollo.pcc_last = dc_apollo.pcc_current;
 					dc_apollo.dc_pcc_updated = 1;

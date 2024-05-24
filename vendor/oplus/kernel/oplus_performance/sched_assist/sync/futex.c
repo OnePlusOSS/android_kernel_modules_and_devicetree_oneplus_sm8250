@@ -553,3 +553,12 @@ void locking_vh_futex_wake_up_q_finish(int nr_wake, int target_nr)
 			target_nr, current->inherit_ux);
 	}
 }
+
+void init_task_lkinfo(struct task_struct *p)
+{
+	p->lkinfo.waittime_stamp = 0;
+	p->lkinfo.opt_spin_start_time = 0;
+	p->lkinfo.holder = NULL;
+	p->lkinfo.ux_contrib = false;
+	p->lkinfo.is_block_ux = false;
+}

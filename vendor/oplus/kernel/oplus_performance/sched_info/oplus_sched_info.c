@@ -108,6 +108,9 @@ static int jank_unregister_hook(void)
 #define JANK_INFO_DIR				"jank_info"
 #define JANK_INFO_PROC_NODE			"cpu_jank_info"
 
+bool jankinfo_init = false;
+EXPORT_SYMBOL(jankinfo_init);
+
 static int __init jank_info_init(void)
 {
 	struct proc_dir_entry *proc_entry;
@@ -184,6 +187,7 @@ static int __init jank_info_init(void)
 #endif
 	tasktrack_init();
 	jank_calcload_init();
+	jankinfo_init = true;
 
 	return 0;
 

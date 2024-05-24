@@ -22,6 +22,7 @@
 #include "aw8697.h"
 #include "aw8697_reg.h"
 #include "aw8697_config.h"
+#include "aw8697_rtp_key_data.h"
 #ifdef OPLUS_FEATURE_CHG_BASIC
 #include <linux/proc_fs.h>
 #include <linux/pm_qos.h>
@@ -289,6 +290,36 @@ static char aw8697_ringtone_rtp_f0_170_name[][AW8697_RTP_NAME_MAX] ={
         {"barca_notice_ring_RTP_122_170.bin"},
 };
 
+
+static char aw8697_oos_shortvib_rtp_name[][AW8697_RTP_NAME_MAX] = {
+	{"20ms_RTP.bin"},
+	{"40ms_RTP.bin"},
+	{"60ms_RTP.bin"},
+	{"80ms_RTP.bin"},
+	{"100ms_RTP.bin"},
+	{"120ms_RTP.bin"},
+	{"140ms_RTP.bin"},
+	{"160ms_RTP.bin"},
+	{"180ms_RTP.bin"},
+	{"200ms_RTP.bin"},
+	{"220ms_RTP.bin"},
+	{"240ms_RTP.bin"},
+	{"260ms_RTP.bin"},
+	{"280ms_RTP.bin"},
+	{"300ms_RTP.bin"},
+	{"320ms_RTP.bin"},
+	{"340ms_RTP.bin"},
+	{"360ms_RTP.bin"},
+	{"380ms_RTP.bin"},
+	{"400ms_RTP.bin"},
+	{"420ms_RTP.bin"},
+	{"440ms_RTP.bin"},
+	{"460ms_RTP.bin"},
+	{"480ms_RTP.bin"},
+	{"500ms_RTP.bin"},
+};
+
+
 #ifdef OPLUS_FEATURE_CHG_BASIC
 static char aw8697_rtp_name_145Hz[][AW8697_RTP_NAME_MAX] = {
 	{"aw8697_rtp.bin"},
@@ -510,6 +541,220 @@ static char aw8697_rtp_name_145Hz[][AW8697_RTP_NAME_MAX] = {
 	{"aw8697_reserved_198.bin"},
 	{"aw8697_reserved_199.bin"},
 	{"aw8697_reserved_200.bin"},
+
+	{"aw8697_reserved_201.bin"},
+	{"aw8697_reserved_202.bin"},
+	{"aw8697_reserved_203.bin"},
+	{"aw8697_reserved_204.bin"},
+	{"aw8697_reserved_205.bin"},
+	{"aw8697_reserved_206.bin"},
+	{"aw8697_reserved_207.bin"},
+	{"aw8697_reserved_208.bin"},
+	{"aw8697_reserved_209.bin"},
+	{"aw8697_reserved_210.bin"},
+	{"aw8697_reserved_211.bin"},
+	{"aw8697_reserved_212.bin"},
+	{"aw8697_reserved_213.bin"},
+	{"aw8697_reserved_214.bin"},
+	{"aw8697_reserved_215.bin"},
+	{"aw8697_reserved_216.bin"},
+	{"aw8697_reserved_217.bin"},
+	{"aw8697_reserved_218.bin"},
+	{"aw8697_reserved_219.bin"},
+	{"aw8697_reserved_220.bin"},
+	{"aw8697_reserved_221.bin"},
+	{"aw8697_reserved_222.bin"},
+	{"aw8697_reserved_223.bin"},
+	{"aw8697_reserved_224.bin"},
+	{"aw8697_reserved_225.bin"},
+	{"aw8697_reserved_226.bin"},
+	{"aw8697_reserved_227.bin"},
+	{"aw8697_reserved_228.bin"},
+	{"aw8697_reserved_229.bin"},
+	{"aw8697_reserved_230.bin"},
+	{"aw8697_reserved_231.bin"},
+	{"aw8697_reserved_232.bin"},
+	{"aw8697_reserved_233.bin"},
+	{"aw8697_reserved_234.bin"},
+	{"aw8697_reserved_235.bin"},
+	{"aw8697_reserved_236.bin"},
+	{"aw8697_reserved_237.bin"},
+	{"aw8697_reserved_238.bin"},
+	{"aw8697_reserved_239.bin"},
+	{"aw8697_reserved_240.bin"},
+	{"aw8697_reserved_241.bin"},
+	{"aw8697_reserved_242.bin"},
+	{"aw8697_reserved_243.bin"},
+	{"aw8697_reserved_244.bin"},
+	{"aw8697_reserved_245.bin"},
+	{"aw8697_reserved_246.bin"},
+	{"aw8697_reserved_247.bin"},
+	{"aw8697_reserved_248.bin"},
+	{"aw8697_reserved_249.bin"},
+	{"aw8697_reserved_250.bin"},
+	{"aw8697_reserved_251.bin"},
+	{"aw8697_reserved_252.bin"},
+	{"aw8697_reserved_253.bin"},
+	{"aw8697_reserved_254.bin"},
+	{"aw8697_reserved_255.bin"},
+	{"aw8697_reserved_256.bin"},
+	{"aw8697_reserved_257.bin"},
+	{"aw8697_reserved_258.bin"},
+	{"aw8697_reserved_259.bin"},
+	{"aw8697_reserved_260.bin"},
+	{"aw8697_reserved_261.bin"},
+	{"aw8697_reserved_262.bin"},
+	{"aw8697_reserved_263.bin"},
+	{"aw8697_reserved_264.bin"},
+	{"aw8697_reserved_265.bin"},
+	{"aw8697_reserved_266.bin"},
+	{"aw8697_reserved_267.bin"},
+	{"aw8697_reserved_268.bin"},
+	{"aw8697_reserved_269.bin"},
+	{"aw8697_reserved_270.bin"},
+	{"aw8697_reserved_271.bin"},
+	{"aw8697_reserved_272.bin"},
+	{"aw8697_reserved_273.bin"},
+	{"aw8697_reserved_274.bin"},
+	{"aw8697_reserved_275.bin"},
+	{"aw8697_reserved_276.bin"},
+	{"aw8697_reserved_277.bin"},
+	{"aw8697_reserved_278.bin"},
+	{"aw8697_reserved_279.bin"},
+	{"aw8697_reserved_280.bin"},
+	{"aw8697_reserved_281.bin"},
+	{"aw8697_reserved_282.bin"},
+	{"aw8697_reserved_283.bin"},
+	{"aw8697_reserved_284.bin"},
+	{"aw8697_reserved_285.bin"},
+	{"aw8697_reserved_286.bin"},
+	{"aw8697_reserved_287.bin"},
+	{"aw8697_reserved_288.bin"},
+	{"aw8697_reserved_289.bin"},
+	{"aw8697_reserved_290.bin"},
+	{"aw8697_reserved_291.bin"},
+	{"aw8697_reserved_292.bin"},
+	{"aw8697_reserved_293.bin"},
+	{"aw8697_reserved_294.bin"},
+	{"aw8697_reserved_295.bin"},
+	{"aw8697_reserved_296.bin"},
+	{"aw8697_reserved_297.bin"},
+	{"aw8697_reserved_298.bin"},
+	{"aw8697_reserved_299.bin"},
+	{"aw8697_reserved_300.bin"},
+        {"aw8697_reserved_301.bin"},
+        {"aw8697_reserved_302.bin"},
+        {"aw8697_reserved_303.bin"},
+        {"aw8697_reserved_304.bin"},
+        {"aw8697_reserved_305.bin"},
+        {"aw8697_reserved_306.bin"},
+        {"aw8697_reserved_307.bin"},
+        {"aw8697_reserved_308.bin"},
+        {"aw8697_reserved_309.bin"},
+        {"aw8697_reserved_310.bin"},
+        {"aw8697_reserved_311.bin"},
+        {"aw8697_reserved_312.bin"},
+        {"aw8697_reserved_313.bin"},
+        {"aw8697_reserved_314.bin"},
+        {"aw8697_reserved_315.bin"},
+        {"aw8697_reserved_316.bin"},
+        {"aw8697_reserved_317.bin"},
+        {"aw8697_reserved_318.bin"},
+        {"aw8697_reserved_319.bin"},
+        {"aw8697_reserved_320.bin"},
+        {"aw8697_reserved_321.bin"},
+        {"aw8697_reserved_322.bin"},
+        {"aw8697_reserved_323.bin"},
+        {"aw8697_reserved_324.bin"},
+        {"aw8697_reserved_325.bin"},
+        {"aw8697_reserved_326.bin"},
+        {"aw8697_reserved_327.bin"},
+        {"aw8697_reserved_328.bin"},
+        {"aw8697_reserved_329.bin"},
+        {"aw8697_reserved_330.bin"},
+        {"aw8697_reserved_331.bin"},
+        {"aw8697_reserved_332.bin"},
+        {"aw8697_reserved_333.bin"},
+        {"aw8697_reserved_334.bin"},
+        {"aw8697_reserved_335.bin"},
+        {"aw8697_reserved_336.bin"},
+        {"aw8697_reserved_337.bin"},
+        {"aw8697_reserved_338.bin"},
+        {"aw8697_reserved_339.bin"},
+        {"aw8697_reserved_340.bin"},
+        {"aw8697_reserved_341.bin"},
+        {"aw8697_reserved_342.bin"},
+        {"aw8697_reserved_343.bin"},
+        {"aw8697_reserved_344.bin"},
+        {"aw8697_reserved_345.bin"},
+        {"aw8697_reserved_346.bin"},
+        {"aw8697_reserved_347.bin"},
+        {"aw8697_reserved_348.bin"},
+        {"aw8697_reserved_349.bin"},
+        {"aw8697_reserved_350.bin"},
+        {"aw8697_reserved_351.bin"},
+        {"aw8697_reserved_352.bin"},
+        {"aw8697_reserved_353.bin"},
+        {"aw8697_reserved_354.bin"},
+        {"aw8697_reserved_355.bin"},
+        {"aw8697_reserved_356.bin"},
+        {"aw8697_reserved_357.bin"},
+        {"aw8697_reserved_358.bin"},
+        {"aw8697_reserved_359.bin"},
+        {"aw8697_reserved_360.bin"},
+        {"aw8697_reserved_361.bin"},
+        {"aw8697_reserved_362.bin"},
+        {"aw8697_reserved_363.bin"},
+        {"aw8697_reserved_364.bin"},
+        {"aw8697_reserved_365.bin"},
+        {"aw8697_reserved_366.bin"},
+        {"aw8697_reserved_367.bin"},
+        {"aw8697_reserved_368.bin"},
+        {"aw8697_reserved_369.bin"},
+        {"aw8697_reserved_370.bin"},
+
+	/* Add for OS14 Start */
+	{"aw8697_Nightsky_RTP_371_145Hz.bin"},
+	{"aw8697_TheStars_RTP_372_145Hz.bin"},
+	{"aw8697_TheSunrise_RTP_373_145Hz.bin"},
+	{"aw8697_TheSunset_RTP_374_145Hz.bin"},
+	{"aw8697_Meditate_RTP_375_145Hz.bin"},
+	{"aw8697_Distant_RTP_376_145Hz.bin"},
+	{"aw8697_Pond_RTP_377_145Hz.bin"},
+	{"aw8697_Moonlotus_RTP_378_145Hz.bin"},
+	{"aw8697_Ripplingwater_RTP_379_145Hz.bin"},
+	{"aw8697_Shimmer_RTP_380_145Hz.bin"},
+	{"aw8697_Batheearth_RTP_381_145Hz.bin"},
+	{"aw8697_Junglemorning_RTP_382_145Hz.bin"},
+	{"aw8697_Silver_RTP_383_145Hz.bin"},
+	{"aw8697_Elegantquiet_RTP_384_145Hz.bin"},
+	{"aw8697_Summerbeach_RTP_385_145Hz.bin"},
+	{"aw8697_Summernight_RTP_386_145Hz.bin"},
+	{"aw8697_Icesnow_RTP_387_145Hz.bin"},
+	{"aw8697_Wintersnow_RTP_388_145Hz.bin"},
+	{"aw8697_Rainforest_RTP_389_145Hz.bin"},
+	{"aw8697_Raineverything_RTP_390_145Hz.bin"},
+	{"aw8697_Staracross_RTP_391_145Hz.bin"},
+	{"aw8697_Fullmoon_RTP_392_145Hz.bin"},
+	{"aw8697_Clouds_RTP_393_145Hz.bin"},
+	{"aw8697_Wonderland_RTP_394_145Hz.bin"},
+	{"aw8697_Still_RTP_395_145Hz.bin"},
+	{"aw8697_Haunting_RTP_396_145Hz.bin"},
+	{"aw8697_Dragonfly_RTP_397_145Hz.bin"},
+	{"aw8697_Dropwater_RTP_398_145Hz.bin"},
+	{"aw8697_Fluctuation_RTP_399_145Hz.bin"},
+	{"aw8697_Blow_RTP_400_145Hz.bin"},
+	{"aw8697_Leaveslight_RTP_401_145Hz.bin"},
+	{"aw8697_Warmsun_RTP_402_145Hz.bin"},
+	{"aw8697_Snowflake_RTP_403_145Hz.bin"},
+	{"aw8697_Crystalclear_RTP_404_145Hz.bin"},
+	{"aw8697_Insects_RTP_405_145Hz.bin"},
+	{"aw8697_Dew_RTP_406_145Hz.bin"},
+	{"aw8697_Shine_RTP_407_145Hz.bin"},
+	{"aw8697_Frost_RTP_408_145Hz.bin"},
+	{"aw8697_Rainsplash_RTP_409_145Hz.bin"},
+	{"aw8697_Raindrop_RTP_410_145Hz.bin"},
+	/* Add for OS14 End */
 };
 
 static char aw8697_rtp_name_150Hz[][AW8697_RTP_NAME_MAX] = {
@@ -732,6 +977,220 @@ static char aw8697_rtp_name_150Hz[][AW8697_RTP_NAME_MAX] = {
 	{"aw8697_reserved_198.bin"},
 	{"aw8697_reserved_199.bin"},
 	{"aw8697_reserved_200.bin"},
+
+	{"aw8697_reserved_201.bin"},
+	{"aw8697_reserved_202.bin"},
+	{"aw8697_reserved_203.bin"},
+	{"aw8697_reserved_204.bin"},
+	{"aw8697_reserved_205.bin"},
+	{"aw8697_reserved_206.bin"},
+	{"aw8697_reserved_207.bin"},
+	{"aw8697_reserved_208.bin"},
+	{"aw8697_reserved_209.bin"},
+	{"aw8697_reserved_210.bin"},
+	{"aw8697_reserved_211.bin"},
+	{"aw8697_reserved_212.bin"},
+	{"aw8697_reserved_213.bin"},
+	{"aw8697_reserved_214.bin"},
+	{"aw8697_reserved_215.bin"},
+	{"aw8697_reserved_216.bin"},
+	{"aw8697_reserved_217.bin"},
+	{"aw8697_reserved_218.bin"},
+	{"aw8697_reserved_219.bin"},
+	{"aw8697_reserved_220.bin"},
+	{"aw8697_reserved_221.bin"},
+	{"aw8697_reserved_222.bin"},
+	{"aw8697_reserved_223.bin"},
+	{"aw8697_reserved_224.bin"},
+	{"aw8697_reserved_225.bin"},
+	{"aw8697_reserved_226.bin"},
+	{"aw8697_reserved_227.bin"},
+	{"aw8697_reserved_228.bin"},
+	{"aw8697_reserved_229.bin"},
+	{"aw8697_reserved_230.bin"},
+	{"aw8697_reserved_231.bin"},
+	{"aw8697_reserved_232.bin"},
+	{"aw8697_reserved_233.bin"},
+	{"aw8697_reserved_234.bin"},
+	{"aw8697_reserved_235.bin"},
+	{"aw8697_reserved_236.bin"},
+	{"aw8697_reserved_237.bin"},
+	{"aw8697_reserved_238.bin"},
+	{"aw8697_reserved_239.bin"},
+	{"aw8697_reserved_240.bin"},
+	{"aw8697_reserved_241.bin"},
+	{"aw8697_reserved_242.bin"},
+	{"aw8697_reserved_243.bin"},
+	{"aw8697_reserved_244.bin"},
+	{"aw8697_reserved_245.bin"},
+	{"aw8697_reserved_246.bin"},
+	{"aw8697_reserved_247.bin"},
+	{"aw8697_reserved_248.bin"},
+	{"aw8697_reserved_249.bin"},
+	{"aw8697_reserved_250.bin"},
+	{"aw8697_reserved_251.bin"},
+	{"aw8697_reserved_252.bin"},
+	{"aw8697_reserved_253.bin"},
+	{"aw8697_reserved_254.bin"},
+	{"aw8697_reserved_255.bin"},
+	{"aw8697_reserved_256.bin"},
+	{"aw8697_reserved_257.bin"},
+	{"aw8697_reserved_258.bin"},
+	{"aw8697_reserved_259.bin"},
+	{"aw8697_reserved_260.bin"},
+	{"aw8697_reserved_261.bin"},
+	{"aw8697_reserved_262.bin"},
+	{"aw8697_reserved_263.bin"},
+	{"aw8697_reserved_264.bin"},
+	{"aw8697_reserved_265.bin"},
+	{"aw8697_reserved_266.bin"},
+	{"aw8697_reserved_267.bin"},
+	{"aw8697_reserved_268.bin"},
+	{"aw8697_reserved_269.bin"},
+	{"aw8697_reserved_270.bin"},
+	{"aw8697_reserved_271.bin"},
+	{"aw8697_reserved_272.bin"},
+	{"aw8697_reserved_273.bin"},
+	{"aw8697_reserved_274.bin"},
+	{"aw8697_reserved_275.bin"},
+	{"aw8697_reserved_276.bin"},
+	{"aw8697_reserved_277.bin"},
+	{"aw8697_reserved_278.bin"},
+	{"aw8697_reserved_279.bin"},
+	{"aw8697_reserved_280.bin"},
+	{"aw8697_reserved_281.bin"},
+	{"aw8697_reserved_282.bin"},
+	{"aw8697_reserved_283.bin"},
+	{"aw8697_reserved_284.bin"},
+	{"aw8697_reserved_285.bin"},
+	{"aw8697_reserved_286.bin"},
+	{"aw8697_reserved_287.bin"},
+	{"aw8697_reserved_288.bin"},
+	{"aw8697_reserved_289.bin"},
+	{"aw8697_reserved_290.bin"},
+	{"aw8697_reserved_291.bin"},
+	{"aw8697_reserved_292.bin"},
+	{"aw8697_reserved_293.bin"},
+	{"aw8697_reserved_294.bin"},
+	{"aw8697_reserved_295.bin"},
+	{"aw8697_reserved_296.bin"},
+	{"aw8697_reserved_297.bin"},
+	{"aw8697_reserved_298.bin"},
+	{"aw8697_reserved_299.bin"},
+	{"aw8697_reserved_300.bin"},
+        {"aw8697_reserved_301.bin"},
+        {"aw8697_reserved_302.bin"},
+        {"aw8697_reserved_303.bin"},
+        {"aw8697_reserved_304.bin"},
+        {"aw8697_reserved_305.bin"},
+        {"aw8697_reserved_306.bin"},
+        {"aw8697_reserved_307.bin"},
+        {"aw8697_reserved_308.bin"},
+        {"aw8697_reserved_309.bin"},
+        {"aw8697_reserved_310.bin"},
+        {"aw8697_reserved_311.bin"},
+        {"aw8697_reserved_312.bin"},
+        {"aw8697_reserved_313.bin"},
+        {"aw8697_reserved_314.bin"},
+        {"aw8697_reserved_315.bin"},
+        {"aw8697_reserved_316.bin"},
+        {"aw8697_reserved_317.bin"},
+        {"aw8697_reserved_318.bin"},
+        {"aw8697_reserved_319.bin"},
+        {"aw8697_reserved_320.bin"},
+        {"aw8697_reserved_321.bin"},
+        {"aw8697_reserved_322.bin"},
+        {"aw8697_reserved_323.bin"},
+        {"aw8697_reserved_324.bin"},
+        {"aw8697_reserved_325.bin"},
+        {"aw8697_reserved_326.bin"},
+        {"aw8697_reserved_327.bin"},
+        {"aw8697_reserved_328.bin"},
+        {"aw8697_reserved_329.bin"},
+        {"aw8697_reserved_330.bin"},
+        {"aw8697_reserved_331.bin"},
+        {"aw8697_reserved_332.bin"},
+        {"aw8697_reserved_333.bin"},
+        {"aw8697_reserved_334.bin"},
+        {"aw8697_reserved_335.bin"},
+        {"aw8697_reserved_336.bin"},
+        {"aw8697_reserved_337.bin"},
+        {"aw8697_reserved_338.bin"},
+        {"aw8697_reserved_339.bin"},
+        {"aw8697_reserved_340.bin"},
+        {"aw8697_reserved_341.bin"},
+        {"aw8697_reserved_342.bin"},
+        {"aw8697_reserved_343.bin"},
+        {"aw8697_reserved_344.bin"},
+        {"aw8697_reserved_345.bin"},
+        {"aw8697_reserved_346.bin"},
+        {"aw8697_reserved_347.bin"},
+        {"aw8697_reserved_348.bin"},
+        {"aw8697_reserved_349.bin"},
+        {"aw8697_reserved_350.bin"},
+        {"aw8697_reserved_351.bin"},
+        {"aw8697_reserved_352.bin"},
+        {"aw8697_reserved_353.bin"},
+        {"aw8697_reserved_354.bin"},
+        {"aw8697_reserved_355.bin"},
+        {"aw8697_reserved_356.bin"},
+        {"aw8697_reserved_357.bin"},
+        {"aw8697_reserved_358.bin"},
+        {"aw8697_reserved_359.bin"},
+        {"aw8697_reserved_360.bin"},
+        {"aw8697_reserved_361.bin"},
+        {"aw8697_reserved_362.bin"},
+        {"aw8697_reserved_363.bin"},
+        {"aw8697_reserved_364.bin"},
+        {"aw8697_reserved_365.bin"},
+        {"aw8697_reserved_366.bin"},
+        {"aw8697_reserved_367.bin"},
+        {"aw8697_reserved_368.bin"},
+        {"aw8697_reserved_369.bin"},
+        {"aw8697_reserved_370.bin"},
+
+	/* Add for OS14 Start */
+	{"aw8697_Nightsky_RTP_371_150Hz.bin"},
+	{"aw8697_TheStars_RTP_372_150Hz.bin"},
+	{"aw8697_TheSunrise_RTP_373_150Hz.bin"},
+	{"aw8697_TheSunset_RTP_374_150Hz.bin"},
+	{"aw8697_Meditate_RTP_375_150Hz.bin"},
+	{"aw8697_Distant_RTP_376_150Hz.bin"},
+	{"aw8697_Pond_RTP_377_150Hz.bin"},
+	{"aw8697_Moonlotus_RTP_378_150Hz.bin"},
+	{"aw8697_Ripplingwater_RTP_379_150Hz.bin"},
+	{"aw8697_Shimmer_RTP_380_150Hz.bin"},
+	{"aw8697_Batheearth_RTP_381_150Hz.bin"},
+	{"aw8697_Junglemorning_RTP_382_150Hz.bin"},
+	{"aw8697_Silver_RTP_383_150Hz.bin"},
+	{"aw8697_Elegantquiet_RTP_384_150Hz.bin"},
+	{"aw8697_Summerbeach_RTP_385_150Hz.bin"},
+	{"aw8697_Summernight_RTP_386_150Hz.bin"},
+	{"aw8697_Icesnow_RTP_387_150Hz.bin"},
+	{"aw8697_Wintersnow_RTP_388_150Hz.bin"},
+	{"aw8697_Rainforest_RTP_389_150Hz.bin"},
+	{"aw8697_Raineverything_RTP_390_150Hz.bin"},
+	{"aw8697_Staracross_RTP_391_150Hz.bin"},
+	{"aw8697_Fullmoon_RTP_392_150Hz.bin"},
+	{"aw8697_Clouds_RTP_393_150Hz.bin"},
+	{"aw8697_Wonderland_RTP_394_150Hz.bin"},
+	{"aw8697_Still_RTP_395_150Hz.bin"},
+	{"aw8697_Haunting_RTP_396_150Hz.bin"},
+	{"aw8697_Dragonfly_RTP_397_150Hz.bin"},
+	{"aw8697_Dropwater_RTP_398_150Hz.bin"},
+	{"aw8697_Fluctuation_RTP_399_150Hz.bin"},
+	{"aw8697_Blow_RTP_400_150Hz.bin"},
+	{"aw8697_Leaveslight_RTP_401_150Hz.bin"},
+	{"aw8697_Warmsun_RTP_402_150Hz.bin"},
+	{"aw8697_Snowflake_RTP_403_150Hz.bin"},
+	{"aw8697_Crystalclear_RTP_404_150Hz.bin"},
+	{"aw8697_Insects_RTP_405_150Hz.bin"},
+	{"aw8697_Dew_RTP_406_150Hz.bin"},
+	{"aw8697_Shine_RTP_407_150Hz.bin"},
+	{"aw8697_Frost_RTP_408_150Hz.bin"},
+	{"aw8697_Rainsplash_RTP_409_150Hz.bin"},
+	{"aw8697_Raindrop_RTP_410_150Hz.bin"},
+	/* Add for OS14 End */
 };
 
 static char aw8697_rtp_name_155Hz[][AW8697_RTP_NAME_MAX] = {
@@ -954,6 +1413,220 @@ static char aw8697_rtp_name_155Hz[][AW8697_RTP_NAME_MAX] = {
 	{"aw8697_reserved_198.bin"},
 	{"aw8697_reserved_199.bin"},
 	{"aw8697_reserved_200.bin"},
+
+	{"aw8697_reserved_201.bin"},
+	{"aw8697_reserved_202.bin"},
+	{"aw8697_reserved_203.bin"},
+	{"aw8697_reserved_204.bin"},
+	{"aw8697_reserved_205.bin"},
+	{"aw8697_reserved_206.bin"},
+	{"aw8697_reserved_207.bin"},
+	{"aw8697_reserved_208.bin"},
+	{"aw8697_reserved_209.bin"},
+	{"aw8697_reserved_210.bin"},
+	{"aw8697_reserved_211.bin"},
+	{"aw8697_reserved_212.bin"},
+	{"aw8697_reserved_213.bin"},
+	{"aw8697_reserved_214.bin"},
+	{"aw8697_reserved_215.bin"},
+	{"aw8697_reserved_216.bin"},
+	{"aw8697_reserved_217.bin"},
+	{"aw8697_reserved_218.bin"},
+	{"aw8697_reserved_219.bin"},
+	{"aw8697_reserved_220.bin"},
+	{"aw8697_reserved_221.bin"},
+	{"aw8697_reserved_222.bin"},
+	{"aw8697_reserved_223.bin"},
+	{"aw8697_reserved_224.bin"},
+	{"aw8697_reserved_225.bin"},
+	{"aw8697_reserved_226.bin"},
+	{"aw8697_reserved_227.bin"},
+	{"aw8697_reserved_228.bin"},
+	{"aw8697_reserved_229.bin"},
+	{"aw8697_reserved_230.bin"},
+	{"aw8697_reserved_231.bin"},
+	{"aw8697_reserved_232.bin"},
+	{"aw8697_reserved_233.bin"},
+	{"aw8697_reserved_234.bin"},
+	{"aw8697_reserved_235.bin"},
+	{"aw8697_reserved_236.bin"},
+	{"aw8697_reserved_237.bin"},
+	{"aw8697_reserved_238.bin"},
+	{"aw8697_reserved_239.bin"},
+	{"aw8697_reserved_240.bin"},
+	{"aw8697_reserved_241.bin"},
+	{"aw8697_reserved_242.bin"},
+	{"aw8697_reserved_243.bin"},
+	{"aw8697_reserved_244.bin"},
+	{"aw8697_reserved_245.bin"},
+	{"aw8697_reserved_246.bin"},
+	{"aw8697_reserved_247.bin"},
+	{"aw8697_reserved_248.bin"},
+	{"aw8697_reserved_249.bin"},
+	{"aw8697_reserved_250.bin"},
+	{"aw8697_reserved_251.bin"},
+	{"aw8697_reserved_252.bin"},
+	{"aw8697_reserved_253.bin"},
+	{"aw8697_reserved_254.bin"},
+	{"aw8697_reserved_255.bin"},
+	{"aw8697_reserved_256.bin"},
+	{"aw8697_reserved_257.bin"},
+	{"aw8697_reserved_258.bin"},
+	{"aw8697_reserved_259.bin"},
+	{"aw8697_reserved_260.bin"},
+	{"aw8697_reserved_261.bin"},
+	{"aw8697_reserved_262.bin"},
+	{"aw8697_reserved_263.bin"},
+	{"aw8697_reserved_264.bin"},
+	{"aw8697_reserved_265.bin"},
+	{"aw8697_reserved_266.bin"},
+	{"aw8697_reserved_267.bin"},
+	{"aw8697_reserved_268.bin"},
+	{"aw8697_reserved_269.bin"},
+	{"aw8697_reserved_270.bin"},
+	{"aw8697_reserved_271.bin"},
+	{"aw8697_reserved_272.bin"},
+	{"aw8697_reserved_273.bin"},
+	{"aw8697_reserved_274.bin"},
+	{"aw8697_reserved_275.bin"},
+	{"aw8697_reserved_276.bin"},
+	{"aw8697_reserved_277.bin"},
+	{"aw8697_reserved_278.bin"},
+	{"aw8697_reserved_279.bin"},
+	{"aw8697_reserved_280.bin"},
+	{"aw8697_reserved_281.bin"},
+	{"aw8697_reserved_282.bin"},
+	{"aw8697_reserved_283.bin"},
+	{"aw8697_reserved_284.bin"},
+	{"aw8697_reserved_285.bin"},
+	{"aw8697_reserved_286.bin"},
+	{"aw8697_reserved_287.bin"},
+	{"aw8697_reserved_288.bin"},
+	{"aw8697_reserved_289.bin"},
+	{"aw8697_reserved_290.bin"},
+	{"aw8697_reserved_291.bin"},
+	{"aw8697_reserved_292.bin"},
+	{"aw8697_reserved_293.bin"},
+	{"aw8697_reserved_294.bin"},
+	{"aw8697_reserved_295.bin"},
+	{"aw8697_reserved_296.bin"},
+	{"aw8697_reserved_297.bin"},
+	{"aw8697_reserved_298.bin"},
+	{"aw8697_reserved_299.bin"},
+	{"aw8697_reserved_300.bin"},
+        {"aw8697_reserved_301.bin"},
+        {"aw8697_reserved_302.bin"},
+        {"aw8697_reserved_303.bin"},
+        {"aw8697_reserved_304.bin"},
+        {"aw8697_reserved_305.bin"},
+        {"aw8697_reserved_306.bin"},
+        {"aw8697_reserved_307.bin"},
+        {"aw8697_reserved_308.bin"},
+        {"aw8697_reserved_309.bin"},
+        {"aw8697_reserved_310.bin"},
+        {"aw8697_reserved_311.bin"},
+        {"aw8697_reserved_312.bin"},
+        {"aw8697_reserved_313.bin"},
+        {"aw8697_reserved_314.bin"},
+        {"aw8697_reserved_315.bin"},
+        {"aw8697_reserved_316.bin"},
+        {"aw8697_reserved_317.bin"},
+        {"aw8697_reserved_318.bin"},
+        {"aw8697_reserved_319.bin"},
+        {"aw8697_reserved_320.bin"},
+        {"aw8697_reserved_321.bin"},
+        {"aw8697_reserved_322.bin"},
+        {"aw8697_reserved_323.bin"},
+        {"aw8697_reserved_324.bin"},
+        {"aw8697_reserved_325.bin"},
+        {"aw8697_reserved_326.bin"},
+        {"aw8697_reserved_327.bin"},
+        {"aw8697_reserved_328.bin"},
+        {"aw8697_reserved_329.bin"},
+        {"aw8697_reserved_330.bin"},
+        {"aw8697_reserved_331.bin"},
+        {"aw8697_reserved_332.bin"},
+        {"aw8697_reserved_333.bin"},
+        {"aw8697_reserved_334.bin"},
+        {"aw8697_reserved_335.bin"},
+        {"aw8697_reserved_336.bin"},
+        {"aw8697_reserved_337.bin"},
+        {"aw8697_reserved_338.bin"},
+        {"aw8697_reserved_339.bin"},
+        {"aw8697_reserved_340.bin"},
+        {"aw8697_reserved_341.bin"},
+        {"aw8697_reserved_342.bin"},
+        {"aw8697_reserved_343.bin"},
+        {"aw8697_reserved_344.bin"},
+        {"aw8697_reserved_345.bin"},
+        {"aw8697_reserved_346.bin"},
+        {"aw8697_reserved_347.bin"},
+        {"aw8697_reserved_348.bin"},
+        {"aw8697_reserved_349.bin"},
+        {"aw8697_reserved_350.bin"},
+        {"aw8697_reserved_351.bin"},
+        {"aw8697_reserved_352.bin"},
+        {"aw8697_reserved_353.bin"},
+        {"aw8697_reserved_354.bin"},
+        {"aw8697_reserved_355.bin"},
+        {"aw8697_reserved_356.bin"},
+        {"aw8697_reserved_357.bin"},
+        {"aw8697_reserved_358.bin"},
+        {"aw8697_reserved_359.bin"},
+        {"aw8697_reserved_360.bin"},
+        {"aw8697_reserved_361.bin"},
+        {"aw8697_reserved_362.bin"},
+        {"aw8697_reserved_363.bin"},
+        {"aw8697_reserved_364.bin"},
+        {"aw8697_reserved_365.bin"},
+        {"aw8697_reserved_366.bin"},
+        {"aw8697_reserved_367.bin"},
+        {"aw8697_reserved_368.bin"},
+        {"aw8697_reserved_369.bin"},
+        {"aw8697_reserved_370.bin"},
+
+	/* Add for OS14 Start */
+	{"aw8697_Nightsky_RTP_371_155Hz.bin"},
+	{"aw8697_TheStars_RTP_372_155Hz.bin"},
+	{"aw8697_TheSunrise_RTP_373_155Hz.bin"},
+	{"aw8697_TheSunset_RTP_374_155Hz.bin"},
+	{"aw8697_Meditate_RTP_375_155Hz.bin"},
+	{"aw8697_Distant_RTP_376_155Hz.bin"},
+	{"aw8697_Pond_RTP_377_155Hz.bin"},
+	{"aw8697_Moonlotus_RTP_378_155Hz.bin"},
+	{"aw8697_Ripplingwater_RTP_379_155Hz.bin"},
+	{"aw8697_Shimmer_RTP_380_155Hz.bin"},
+	{"aw8697_Batheearth_RTP_381_155Hz.bin"},
+	{"aw8697_Junglemorning_RTP_382_155Hz.bin"},
+	{"aw8697_Silver_RTP_383_155Hz.bin"},
+	{"aw8697_Elegantquiet_RTP_384_155Hz.bin"},
+	{"aw8697_Summerbeach_RTP_385_155Hz.bin"},
+	{"aw8697_Summernight_RTP_386_155Hz.bin"},
+	{"aw8697_Icesnow_RTP_387_155Hz.bin"},
+	{"aw8697_Wintersnow_RTP_388_155Hz.bin"},
+	{"aw8697_Rainforest_RTP_389_155Hz.bin"},
+	{"aw8697_Raineverything_RTP_390_155Hz.bin"},
+	{"aw8697_Staracross_RTP_391_155Hz.bin"},
+	{"aw8697_Fullmoon_RTP_392_155Hz.bin"},
+	{"aw8697_Clouds_RTP_393_155Hz.bin"},
+	{"aw8697_Wonderland_RTP_394_155Hz.bin"},
+	{"aw8697_Still_RTP_395_155Hz.bin"},
+	{"aw8697_Haunting_RTP_396_155Hz.bin"},
+	{"aw8697_Dragonfly_RTP_397_155Hz.bin"},
+	{"aw8697_Dropwater_RTP_398_155Hz.bin"},
+	{"aw8697_Fluctuation_RTP_399_155Hz.bin"},
+	{"aw8697_Blow_RTP_400_155Hz.bin"},
+	{"aw8697_Leaveslight_RTP_401_155Hz.bin"},
+	{"aw8697_Warmsun_RTP_402_155Hz.bin"},
+	{"aw8697_Snowflake_RTP_403_155Hz.bin"},
+	{"aw8697_Crystalclear_RTP_404_155Hz.bin"},
+	{"aw8697_Insects_RTP_405_155Hz.bin"},
+	{"aw8697_Dew_RTP_406_155Hz.bin"},
+	{"aw8697_Shine_RTP_407_155Hz.bin"},
+	{"aw8697_Frost_RTP_408_155Hz.bin"},
+	{"aw8697_Rainsplash_RTP_409_155Hz.bin"},
+	{"aw8697_Raindrop_RTP_410_155Hz.bin"},
+	/* Add for OS14 End */
 };
 #endif /* OPLUS_FEATURE_CHG_BASIC */
 
@@ -8025,64 +8698,73 @@ static void aw8697_update_rtp_data(struct aw8697 *aw8697, const struct firmware 
 }
 #endif
 
-static void aw8697_rtp_work_routine(struct work_struct *work)
+const struct firmware *aw8697_rtp_request_firmware_oos(struct aw8697 *aw8697)
 {
-    const struct firmware *rtp_file = NULL;
-    int ret = -1;
-    struct aw8697 *aw8697 = container_of(work, struct aw8697, rtp_work);
+	const struct firmware *rtp_file = NULL;
+	int ret = -1;
 
-    pr_info("%s enter\n", __func__);
-	if (aw8697->rtp_routine_on) {
-		pr_info("%s rtp_routine_on,ignore vibrate before done\n", __func__);
-		return;
+	if(aw8697->rtp_file_num < (sizeof(aw8697_oos_shortvib_rtp_name) / AW8697_RTP_NAME_MAX)) {
+		ret = request_firmware(&rtp_file,
+		aw8697_oos_shortvib_rtp_name[aw8697->rtp_file_num],
+		aw8697->dev);
+	} else {
+		return NULL;
 	}
-    aw8697->rtp_routine_on = 1;
-    /* fw loaded */
 
-    rtp_file = aw8697_rtp_load_file_accord_f0(aw8697);
-    if (!rtp_file)
-    {
-        pr_info("%s  aw8697->rtp_file_num[%d]\n", __func__, aw8697->rtp_file_num);
-        aw8697->rtp_routine_on = 1;
-        if (aw8697->device_id == 815) {
-            if (aw8697->f0 <= 1670) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_165Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else if (aw8697->f0 <= 1725) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_175Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            }
-		} else if (aw8697->device_id == 81538) {
-			if (aw8697->f0 <= 1470) {
-				ret = request_firmware(&rtp_file,
-				aw8697_rtp_name_145Hz[aw8697->rtp_file_num],
-				aw8697->dev);
-			} else if (aw8697->f0 <= 1525) {
-				ret = request_firmware(&rtp_file,
-				aw8697_rtp_name_150Hz[aw8697->rtp_file_num],
-				aw8697->dev);
-			} else {
-				ret = request_firmware(&rtp_file,
-				aw8697_rtp_name_155Hz[aw8697->rtp_file_num],
-				aw8697->dev);
-			}
+	if (ret < 0) {
+		pr_err("%s: failed to read %s, aw8697->f0 = %d\n", __func__,
+			aw8697_oos_shortvib_rtp_name[aw8697->rtp_file_num], aw8697->f0);
+		aw8697->rtp_routine_on = 0;
+		aw8697->oos_shortvib_flag = 0;
+		return NULL;
+	}
+	return rtp_file;
+}
+
+const struct firmware *aw8697_rtp_request_firmware(struct aw8697 *aw8697)
+{
+	const struct firmware *rtp_file = NULL;
+	int ret = -1;
+
+	if (aw8697->device_id == 815) {
+		if (aw8697->f0 <= 1670) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_165Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else if (aw8697->f0 <= 1725) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_175Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		}
+	} else if (aw8697->device_id == 81538) {
+		if (aw8697->f0 <= 1470) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_145Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else if (aw8697->f0 <= 1525) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_150Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_155Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		}
 #ifdef CONFIG_OPLUS_HAPTIC_OOS
 	} else if (aw8697->device_id == 1815) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_1815_170Hz[aw8697->rtp_file_num],
-                aw8697->dev);
+		ret = request_firmware(&rtp_file,
+		aw8697_rtp_name_1815_170Hz[aw8697->rtp_file_num],
+		aw8697->dev);
 #endif
 	} else if (aw8697->device_id == 9595) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_9595_170Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-        } else if (aw8697->device_id == 619) {
+		ret = request_firmware(&rtp_file,
+		aw8697_rtp_name_9595_170Hz[aw8697->rtp_file_num],
+		aw8697->dev);
+	} else if (aw8697->device_id == 619) {
 #ifdef CONFIG_OPLUS_HAPTIC_OOS
 		if (aw8697->f0 <= 1680) {
 			ret = request_firmware(&rtp_file,
@@ -8098,61 +8780,91 @@ static void aw8697_rtp_work_routine(struct work_struct *work)
 			aw8697->dev);
 		}
 #else
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name[aw8697->rtp_file_num],
-                aw8697->dev);
+		ret = request_firmware(&rtp_file,
+		aw8697_rtp_name[aw8697->rtp_file_num],
+		aw8697->dev);
 #endif
-        } else if (aw8697->device_id == 1040) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name[aw8697->rtp_file_num],
-                aw8697->dev);
-        } else if (aw8697->device_id == 832){
+	} else if (aw8697->device_id == 1040) {
+		ret = request_firmware(&rtp_file,
+		aw8697_rtp_name[aw8697->rtp_file_num],
+		aw8697->dev);
+	} else if (aw8697->device_id == 832) {
 #ifndef CONFIG_OPLUS_HAPTIC_OOS
-            if (aw8697->f0 <= 2280) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_226Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else if (aw8697->f0 <= 2320) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_230Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_234Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            }
+		if (aw8697->f0 <= 2280) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_226Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else if (aw8697->f0 <= 2320) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_230Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_234Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		}
 #else
 		ret = request_firmware(&rtp_file,
 		aw8697_rtp_name_0832_234Hz[aw8697->rtp_file_num],
 		aw8697->dev);
 #endif /* CONFIG_OPLUS_HAPTIC_OOS */
-        } else {
-            if (aw8697->f0 <= 2280) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_226Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else if (aw8697->f0 <= 2320) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_230Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else if (aw8697->f0 <= 2350) {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_234Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            } else {
-                ret = request_firmware(&rtp_file,
-                aw8697_rtp_name_0832_237Hz[aw8697->rtp_file_num],
-                aw8697->dev);
-            }
-        }
-        if(ret < 0)
-        {
+	} else {
+		if (aw8697->f0 <= 2280) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_226Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else if (aw8697->f0 <= 2320) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_230Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else if (aw8697->f0 <= 2350) {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_234Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		} else {
+			ret = request_firmware(&rtp_file,
+			aw8697_rtp_name_0832_237Hz[aw8697->rtp_file_num],
+			aw8697->dev);
+		}
+	}
+	if (ret < 0) {
 		pr_err("%s: failed to read %s, aw8697->f0 = %d\n", __func__,
 			aw8697_rtp_name[aw8697->rtp_file_num], aw8697->f0);
-            aw8697->rtp_routine_on = 0;
-            return ;
-        }
-    }
+		aw8697->rtp_routine_on = 0;
+		return NULL;
+	}
+	return rtp_file;
+}
+
+static void aw8697_rtp_work_routine(struct work_struct *work)
+{
+	const struct firmware *rtp_file = NULL;
+	int ret = -1;
+	struct aw8697 *aw8697 = container_of(work, struct aw8697, rtp_work);
+
+	pr_info("%s enter\n", __func__);
+	if (aw8697->rtp_routine_on) {
+		pr_info("%s rtp_routine_on,ignore vibrate before done\n", __func__);
+		return;
+	}
+	aw8697->rtp_routine_on = 1;
+
+	/* fw loaded */
+
+	rtp_file = aw8697_rtp_load_file_accord_f0(aw8697);
+	if (!rtp_file) {
+		pr_info("%s  aw8697->rtp_file_num[%d]\n", __func__, aw8697->rtp_file_num);
+		aw8697->rtp_routine_on = 1;
+
+		if (aw8697->oos_shortvib_flag) {
+			rtp_file = aw8697_rtp_request_firmware_oos(aw8697);
+		} else {
+			rtp_file = aw8697_rtp_request_firmware(aw8697);
+		}
+		if (!rtp_file) {
+			return;
+		}
+	}
     aw8697->rtp_init = 0;
 
     mutex_lock(&aw8697->rtp_lock);//vincent
@@ -8193,6 +8905,7 @@ static void aw8697_rtp_work_routine(struct work_struct *work)
 
 			aw8697_op_clean_status(aw8697);
 			aw8697->rtp_routine_on = 0;
+			aw8697->oos_shortvib_flag = 0;
 			return;
 		}
 		aw8697_rtp->len = rtp_file->size + aw8697->sin_data_lenght;
@@ -8205,6 +8918,7 @@ static void aw8697_rtp_work_routine(struct work_struct *work)
 
 			aw8697_op_clean_status(aw8697);
 			aw8697->rtp_routine_on = 0;
+			aw8697->oos_shortvib_flag = 0;
 			return;
 		}
 		aw8697_rtp->len = rtp_file->size;
@@ -8215,12 +8929,19 @@ static void aw8697_rtp_work_routine(struct work_struct *work)
 		pr_err("%s: error allocating memory\n", __func__);
 		aw8697_op_clean_status(aw8697);
 		aw8697->rtp_routine_on = 0;
+		aw8697->oos_shortvib_flag = 0;
 		mutex_unlock(&aw8697->rtp_lock);
 		return;
 	}
+	if (aw8697->oos_shortvib_flag) {
+		pr_info("%s: rtp file [%s] size = %d\n", __func__,
+			aw8697_oos_shortvib_rtp_name[aw8697->rtp_file_num], aw8697_rtp->len);
+	} else {
+		pr_info("%s: rtp file [%s] size = %d\n", __func__,
+			aw8697_rtp_name[aw8697->rtp_file_num], aw8697_rtp->len);
+	}
 
-	pr_info("%s: rtp file [%s] size = %d\n", __func__,
-		aw8697_rtp_name[aw8697->rtp_file_num], aw8697_rtp->len);
+
 	if (aw8697->sin_add_flag == 1) {
 		aw8697_update_rtp_data(aw8697, rtp_file);
 		aw8697->sin_add_flag = 0;
@@ -8230,7 +8951,10 @@ static void aw8697_rtp_work_routine(struct work_struct *work)
     mutex_unlock(&aw8697->rtp_lock);//vincent
     release_firmware(rtp_file);
 
-	if (aw8697->device_id == 815) {
+	if (aw8697->oos_shortvib_flag) {
+		pr_info("%s: rtp file [%s] size = %d, f0 = %d\n", __func__,
+		aw8697_oos_shortvib_rtp_name[aw8697->rtp_file_num], aw8697_rtp->len, aw8697->f0);
+	} else if (aw8697->device_id == 815) {
 		pr_info("%s: rtp file [%s] size = %d, f0 = %d\n", __func__,
 		aw8697_rtp_name[aw8697->rtp_file_num], aw8697_rtp->len, aw8697->f0);
 	} else if (aw8697->device_id == 81538) {
@@ -8296,7 +9020,303 @@ static void aw8697_rtp_work_routine(struct work_struct *work)
     mutex_unlock(&aw8697->lock);
 
     aw8697_op_clean_status(aw8697);
+	aw8697->oos_shortvib_flag = 0;
     aw8697->rtp_routine_on = 0;
+}
+
+#define OPLUS_162HZ_F0 1630
+#define OPLUS_166HZ_F0 1670
+#define OPLUS_168HZ_F0 1690
+#define OPLUS_170HZ_F0 1710
+#define OPLUS_172HZ_F0 1730
+#define OPLUS_174HZ_F0 1750
+#define OPLUS_178HZ_F0 1780
+
+#define SG_INPUT_DOWN_HIGH  302
+#define SG_INPUT_UP_HIGH    303
+#define SG_INPUT_DOWN_LOW   304
+#define SG_INPUT_UP_LOW     305
+#define INPUT_HIGH          112
+#define INPUT_MEDI          111
+#define INUTP_LOW           110
+
+static void aw8697_rtp_key_work_routine(struct work_struct *work)
+{
+	struct aw8697 *aw8697 = container_of(work, struct aw8697, rtp_key_work);
+	uint8_t *aw8697_rtp_key_data = NULL;
+	uint32_t aw8697_rtp_key_data_len = 0;
+
+	aw8697->rtp_init = 0;
+	mutex_lock(&aw8697->rtp_lock);
+	if (aw8697->device_id == 81538) {
+		switch(aw8697->rtp_file_num) {
+		case SG_INPUT_DOWN_HIGH:
+			aw8697_rtp_key_data = aw8697_81538_rtp_302_150Hz;
+			aw8697_rtp_key_data_len = sizeof(aw8697_81538_rtp_302_150Hz);
+			break;
+		case SG_INPUT_UP_HIGH:
+			aw8697_rtp_key_data = aw8697_81538_rtp_303_150Hz;
+			aw8697_rtp_key_data_len = sizeof(aw8697_81538_rtp_303_150Hz);
+			break;
+		case SG_INPUT_DOWN_LOW:
+			aw8697_rtp_key_data = aw8697_81538_rtp_304_150Hz;
+			aw8697_rtp_key_data_len = sizeof(aw8697_81538_rtp_304_150Hz);
+			break;
+		case SG_INPUT_UP_LOW:
+			aw8697_rtp_key_data = aw8697_81538_rtp_305_150Hz;
+			aw8697_rtp_key_data_len = sizeof(aw8697_81538_rtp_305_150Hz);
+			break;
+		default:
+			goto undef_rtp;
+			break;
+		}
+	} else if (aw8697->device_id == 9595) {
+		switch(aw8697->rtp_file_num) {
+		case SG_INPUT_DOWN_HIGH:
+			if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_302_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_302_166Hz);
+			} else if (aw8697->f0 <= OPLUS_168HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_302_168Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_302_168Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_302_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_302_170Hz);
+			} else if (aw8697->f0 <= OPLUS_172HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_302_172Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_302_172Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_9595_rtp_302_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_302_174Hz);
+			}
+			break;
+		case SG_INPUT_UP_HIGH:
+			if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_303_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_303_166Hz);
+			} else if (aw8697->f0 <= OPLUS_168HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_303_168Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_303_168Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_303_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_303_170Hz);
+			} else if (aw8697->f0 <= OPLUS_172HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_303_172Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_303_172Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_9595_rtp_303_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_303_174Hz);
+			}
+			break;
+		case SG_INPUT_DOWN_LOW:
+			if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_304_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_304_166Hz);
+			} else if (aw8697->f0 <= OPLUS_168HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_304_168Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_304_168Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_304_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_304_170Hz);
+			} else if (aw8697->f0 <= OPLUS_172HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_304_172Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_304_172Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_9595_rtp_304_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_304_174Hz);
+			}
+			break;
+		case SG_INPUT_UP_LOW:
+			if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_305_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_305_166Hz);
+			} else if (aw8697->f0 <= OPLUS_168HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_305_168Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_305_168Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_305_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_305_170Hz);
+			} else if (aw8697->f0 <= OPLUS_172HZ_F0) {
+				aw8697_rtp_key_data = aw8697_9595_rtp_305_172Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_305_172Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_9595_rtp_305_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_9595_rtp_305_174Hz);
+			}
+			break;
+		default:
+			goto undef_rtp;
+			break;
+		}
+	} else {
+		switch(aw8697->rtp_file_num) {
+		case SG_INPUT_DOWN_HIGH:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_302_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_302_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_302_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_302_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_302_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_302_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_302_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_302_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_302_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_302_178Hz);
+			}
+			break;
+		case SG_INPUT_UP_HIGH:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_303_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_303_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_303_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_303_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_303_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_303_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_303_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_303_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_303_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_303_178Hz);
+			}
+			break;
+		case SG_INPUT_DOWN_LOW:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_304_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_304_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_304_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_304_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_304_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_304_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_304_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_304_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_304_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_304_178Hz);
+			}
+			break;
+		case SG_INPUT_UP_LOW:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_305_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_305_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_305_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_305_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_305_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_305_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_305_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_305_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_305_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_305_178Hz);
+			}
+			break;
+		case INUTP_LOW:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_110_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_110_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_110_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_110_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_110_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_110_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_110_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_110_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_110_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_110_178Hz);
+			}
+			break;
+		case INPUT_MEDI:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_111_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_111_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_111_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_111_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_111_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_111_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_111_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_111_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_111_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_111_178Hz);
+			}
+			break;
+		case INPUT_HIGH:
+			if (aw8697->f0 <= OPLUS_162HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_112_162Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_112_162Hz);
+			} else if (aw8697->f0 <= OPLUS_166HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_112_166Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_112_166Hz);
+			} else if (aw8697->f0 <= OPLUS_170HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_112_170Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_112_170Hz);
+			} else if (aw8697->f0 <= OPLUS_174HZ_F0) {
+				aw8697_rtp_key_data = aw8697_rtp_112_174Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_112_174Hz);
+			} else {
+				aw8697_rtp_key_data = aw8697_rtp_112_178Hz;
+				aw8697_rtp_key_data_len = sizeof(aw8697_rtp_112_178Hz);
+			}
+			break;
+		default:
+			goto undef_rtp;
+			break;
+		}
+	}
+#ifndef OPLUS_FEATURE_CHG_BASIC
+	kfree(aw8697_rtp);
+	aw8697_rtp = kzalloc(aw8697_rtp_key_data_len + sizeof(int), GFP_KERNEL);
+	if (!aw8697_rtp) {
+		mutex_unlock(&aw8697->rtp_lock);
+		pr_err("%s: error allocating memory\n", __func__);
+		return;
+	}
+#else
+	aw8697_container_init(aw8697_rtp_key_data_len + sizeof(int));
+	if (!aw8697_rtp) {
+		mutex_unlock(&aw8697->rtp_lock);
+		pr_err("%s: error allocating memory\n", __func__);
+		return;
+	}
+#endif
+	aw8697_rtp->len = aw8697_rtp_key_data_len;
+	memcpy(aw8697_rtp->data, aw8697_rtp_key_data, aw8697_rtp_key_data_len);
+	mutex_unlock(&aw8697->rtp_lock);
+	aw8697->rtp_init = 1;
+	mutex_lock(&aw8697->lock);
+	/* set clock to stand */
+	aw8697_set_clock(aw8697, AW8697_HAPTIC_CLOCK_CALI_OSC_STANDARD);
+	/* gain */
+	aw8697_haptic_ram_vbat_comp(aw8697, false);
+	/* rtp mode config */
+	aw8697_haptic_play_mode(aw8697, AW8697_HAPTIC_RTP_MODE);
+	aw8697_haptic_rtp_init(aw8697);
+	mutex_unlock(&aw8697->lock);
+	aw8697_op_clean_status(aw8697);
+	pr_info("%s: rtp play done\n", __func__);
+	return;
+
+undef_rtp:
+	mutex_unlock(&aw8697->rtp_lock);
+	return;
 }
 
 static void aw8697_rtp_single_cycle_routine(struct work_struct *work)
@@ -10099,19 +11119,7 @@ static ssize_t aw8697_activate_store(struct device *dev,
     }
 #endif
 #else
-	if (aw8697->device_id == 9595) {
-		rtp_max_num = sizeof(aw8697_rtp_name_9595_170Hz) / AW8697_RTP_NAME_MAX;
-	} else if (aw8697->device_id == 1815) {
-		rtp_max_num = sizeof(aw8697_rtp_name_1815_170Hz) / AW8697_RTP_NAME_MAX;
-	} else if (aw8697->device_id == 832) {
-		rtp_max_num = sizeof(aw8697_rtp_name_0832_234Hz) / AW8697_RTP_NAME_MAX;
-#ifdef CONFIG_OPLUS_HAPTIC_OOS
-	} else if (aw8697->device_id == 619) {
-		rtp_max_num = sizeof(aw8697_rtp_name_0619_170Hz) / AW8697_RTP_NAME_MAX;
-#endif /* CONFIG_OPLUS_HAPTIC_OOS */
-	} else {
-		rtp_max_num = sizeof(aw8697_rtp_name) / AW8697_RTP_NAME_MAX;
-	}
+	rtp_max_num = sizeof(aw8697_oos_shortvib_rtp_name) / AW8697_RTP_NAME_MAX;
 
 	mutex_lock(&aw8697->lock);
 	if (aw8697->gain >= 0x75) {
@@ -10140,6 +11148,7 @@ static ssize_t aw8697_activate_store(struct device *dev,
 		aw8697_interrupt_clear(aw8697);
 		if (val < rtp_max_num) {
 			aw8697->rtp_file_num = val;
+			aw8697->oos_shortvib_flag = 1;
 			rtp_is_going_on = aw8697_haptic_juge_RTP_is_going_on(aw8697);
 			if (!rtp_is_going_on)
 				queue_work(system_highpri_wq, &aw8697->rtp_work);
@@ -10684,7 +11693,9 @@ static ssize_t aw8697_rtp_store(struct device *dev, struct device_attribute *att
         }
 #endif
 	if (aw8697->device_id == 9595 && val >= OPLUS_START_INDEX && val <= OPLUS_END_INDEX) {
-		val = val - 49;
+		if (val < 302 || val > 305) {
+			val = val - 49;
+		}
 	}
 
     /*OP add for juge rtp on begin*/
@@ -10750,7 +11761,11 @@ static ssize_t aw8697_rtp_store(struct device *dev, struct device_attribute *att
 	if (val < rtp_max_num) {
 		aw8697->rtp_file_num = val;
 		if(val) {
-			queue_work(system_unbound_wq, &aw8697->rtp_work);
+			if ((aw8697->device_id == 815 || aw8697->device_id == 9595 || aw8697->device_id == 81538) &&
+				((val >= 302 && val <= 305) || (val >= 110 && val <= 112)))
+				queue_work(system_unbound_wq, &aw8697->rtp_key_work);
+			else
+				queue_work(system_unbound_wq, &aw8697->rtp_work);
 		}
 	} else {
 		pr_err("%s: rtp_file_num 0x%02x over max value \n", __func__, aw8697->rtp_file_num);
@@ -12356,6 +13371,7 @@ static int aw8697_vibrator_init(struct aw8697 *aw8697)
     INIT_WORK(&aw8697->vibrator_work, aw8697_vibrator_work_routine);
 
     INIT_WORK(&aw8697->rtp_work, aw8697_rtp_work_routine);
+	INIT_WORK(&aw8697->rtp_key_work, aw8697_rtp_key_work_routine);
 
     INIT_WORK(&aw8697->rtp_single_cycle_work, aw8697_rtp_single_cycle_routine);
     INIT_WORK(&aw8697->rtp_regroup_work, aw8697_rtp_regroup_routine);

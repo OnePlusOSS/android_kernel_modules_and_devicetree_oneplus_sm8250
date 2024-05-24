@@ -628,6 +628,7 @@ static ssize_t oplus_display_get_panel_serial_number(struct device *dev,
 struct device_attribute *attr, char *buf) {
 	int ret = 0;
 	unsigned char read[30];
+	char value[] = { 0x5A, 0x5A };
 	PANEL_SERIAL_INFO panel_serial_info;
 	uint64_t serial_number;
 	struct dsi_display *display = get_main_display();
@@ -668,17 +669,14 @@ struct device_attribute *attr, char *buf) {
 					dsi_display_clk_ctrl(display->dsi_clk_handle,
 							DSI_ALL_CLKS, DSI_CLK_ON);
 				}
-				 {
-					char value[] = { 0x5A, 0x5A };
-					ret = mipi_dsi_dcs_write(&display->panel->mipi_device, 0xF0, value, sizeof(value));
-				 }
+				ret = mipi_dsi_dcs_write(&display->panel->mipi_device, 0xF0, value, sizeof(value));
 				if (display->config.panel_mode == DSI_OP_CMD_MODE) {
 					dsi_display_clk_ctrl(display->dsi_clk_handle,
 							DSI_ALL_CLKS, DSI_CLK_OFF);
 				}
-				mutex_unlock(&display->panel->panel_lock);
-				mutex_unlock(&display->display_lock);
 			}
+			mutex_unlock(&display->panel->panel_lock);
+			mutex_unlock(&display->display_lock);
 			if(ret < 0) {
 				ret = scnprintf(buf, PAGE_SIZE,
 						"Get panel serial number failed, reason:%d", ret);
@@ -1206,6 +1204,9 @@ static ssize_t oplus_display_set_dsi_command(struct device *dev,
 	}
 
 	sscanf(buf, "%s", data);
+	if(strlen(data) != 0) {
+		data[strlen(data)-1]='\0';
+	}
 	if (!strcmp("dump", data)) {
 		rc = oplus_display_dump_dsi_command(display);
 		if (rc < 0)
