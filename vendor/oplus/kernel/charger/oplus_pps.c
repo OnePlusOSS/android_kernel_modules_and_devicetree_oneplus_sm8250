@@ -25,6 +25,7 @@
 #include <linux/ktime.h>
 #include <linux/kernel.h>
 #include <linux/rtc.h>
+#include <oplus_battery_log.h>
 
 #ifdef CONFIG_OPLUS_CHARGER_MTK
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0))
@@ -416,6 +417,7 @@ static int pps_track_init(struct oplus_pps_chip *chip)
 		return -EINVAL;
 
 	mutex_init(&chip->track_pps_err_lock);
+	mutex_init(&chip->track_upload_lock);
 	chip->pps_err_uploading = false;
 	chip->pps_err_load_trigger = NULL;
 
@@ -3033,6 +3035,7 @@ static void oplus_pps_check_resistense(struct oplus_pps_chip *chip)
 	}
 }
 
+static void oplus_pps_voter_charging_stop(struct oplus_pps_chip *chip);
 static void oplus_pps_check_disconnect(struct oplus_pps_chip *chip)
 {
 	if (chip->pps_status <= OPLUS_PPS_STATUS_OPEN_MOS)
@@ -3044,9 +3047,11 @@ static void oplus_pps_check_disconnect(struct oplus_pps_chip *chip)
 			pps_err("current = %d, count:%d\n", chip->data.ap_input_current, chip->count.output_low);
 			if (chip->count.output_low >= PPS_DISCONNECT_IOUT_CNT) {
 				chip->pps_stop_status = PPS_STOP_VOTER_DISCONNECT_OVER;
+				oplus_pps_voter_charging_stop(chip);
 				chip->count.output_low = 0;
 				oplus_pps_track_upload_err_info(chip, TRACK_PPS_ERR_IOUT_MIN,
 								chip->data.ap_input_current);
+				chip->pps_stop_status = 0;
 			}
 		} else {
 			chip->count.output_low = 0;
@@ -4717,6 +4722,43 @@ struct oplus_pps_chip *oplus_pps_get_pps_chip(void)
 	return &g_pps_chip;
 }
 
+static int pps_dump_log_data(char *buffer, int size, void *dev_data)
+{
+	struct oplus_pps_chip *chip = dev_data;
+
+	if (!buffer || !chip)
+		return -ENOMEM;
+
+	snprintf(buffer, size, ",%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+		chip->pps_support_type, chip->pps_status, chip->pps_chging,
+		chip->pps_power, chip->pps_adapter_type,
+		chip->pps_dummy_started, chip->pps_fastchg_started,
+		chip->pps_stop_status, chip->data.cp_master_ibus,
+		chip->data.cp_slave_ibus, chip->data.cp_slave_b_ibus, chip->data.ap_input_current);
+
+	return 0;
+}
+
+static int pps_get_log_head(char *buffer, int size, void *dev_data)
+{
+	struct oplus_pps_chip *chip = dev_data;
+
+	if (!buffer || !chip)
+		return -ENOMEM;
+
+	snprintf(buffer, size,
+		", [pps]:pps_support_type, pps_status, pps_chging, pps_power, pps_adapter_type, pps_dummy_started,"
+		"pps_fastchg_started, pps_stop_status, cp_master_ibus, cp_slave_ibus, cp_slave_b_ibus, ap_input_current");
+
+	return 0;
+}
+
+static struct battery_log_ops battlog_pps_ops = {
+	.dev_name = "pps",
+	.dump_log_head = pps_get_log_head,
+	.dump_log_content = pps_dump_log_data,
+};
+
 #if IS_ENABLED(CONFIG_OPLUS_DYNAMIC_CONFIG_CHARGER)
 #include <oplus_pps_cfg.c>
 #endif
@@ -4748,6 +4790,10 @@ int oplus_pps_init(struct oplus_chg_chip *g_chg_chip)
 #if IS_ENABLED(CONFIG_OPLUS_DYNAMIC_CONFIG_CHARGER)
 	(void)oplus_pps_reg_debug_config(chip);
 #endif
+	if (oplus_pps_get_support_type() != PPS_SUPPORT_NOT) {
+		battlog_pps_ops.dev_data = (void *)chip;
+		battery_log_ops_register(&battlog_pps_ops);
+	}
 	return 0;
 }
 

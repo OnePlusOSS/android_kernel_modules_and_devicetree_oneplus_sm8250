@@ -396,6 +396,7 @@ struct aw8697 {
     struct hrtimer timer;
     struct work_struct vibrator_work;
     struct work_struct rtp_work;
+	struct work_struct rtp_key_work;
     struct work_struct rtp_single_cycle_work;
     struct work_struct rtp_regroup_work;
     struct delayed_work ram_work;
@@ -420,6 +421,7 @@ struct aw8697 {
     unsigned long int microsecond;
     unsigned int sys_frequency;
     unsigned int rtp_len;
+	int oos_shortvib_flag;
 #ifdef CONFIG_OPLUS_HAPTIC_OOS
 	unsigned int sin_num;
 	size_t sin_data_lenght;

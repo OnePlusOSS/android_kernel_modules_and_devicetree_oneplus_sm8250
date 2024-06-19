@@ -161,6 +161,11 @@
 		track,wired_fast_chg_scheme = <1>;
 	};
 
+	oplus_battery_log: oplus,battery_log {
+		compatible = "oplus,battery_log";
+		oplus,battery_log_support;
+	};
+
 	//#ifdef OPLUS_FEATURE_CONNFCSOFT
 	nfc_chipset {
 		compatible = "oplus-nfc-chipset";
@@ -2252,6 +2257,8 @@ board_temp-usr {
 			qcom,ffc_normal_vfloat_over_sw_limit = <4500>;
 			qcom,ffc1_normal_vfloat_over_sw_limit = <4500>;
 			qcom,ffc2_normal_vfloat_over_sw_limit = <4500>;
+
+			oplus,aging_ffc_version = <1>;
 
 			qcom,default_iterm_ma = <135>;
 			qcom,default_temp_normal_fastchg_current_ma = <1100>;

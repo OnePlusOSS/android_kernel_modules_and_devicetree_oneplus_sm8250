@@ -161,6 +161,11 @@
 		track,wired_fast_chg_scheme = <1>;
 	};
 
+	oplus_battery_log: oplus,battery_log {
+		compatible = "oplus,battery_log";
+		oplus,battery_log_support;
+	};
+
 	//#ifdef OPLUS_FEATURE_CONNFCSOFT
 	nfc_chipset {
 		compatible = "oplus-nfc-chipset";

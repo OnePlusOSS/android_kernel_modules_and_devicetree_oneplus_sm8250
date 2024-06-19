@@ -565,8 +565,10 @@ static ssize_t kmalloc_debug_create_read(struct file *file,
 
 	if (len > *off)
 		len -= *off;
-	else
-		len = 0;
+	else {
+		kfree(kbuf);
+		return 0;
+	}
 
 	if (copy_to_user(buffer, kbuf, (len < count ? len : count))) {
 		kfree(kbuf);
@@ -837,7 +839,7 @@ static ssize_t kmalloc_debug_enable_read(struct file *file,
 	if (len > *off)
 		len -= *off;
 	else
-		len = 0;
+		return 0;
 
 	if (copy_to_user(buffer, kbuf + *off, (len < count ? len : count)))
 		return -EFAULT;
@@ -885,7 +887,7 @@ static ssize_t kmalloc_used_read(struct file *file,
 	if (len > *off)
 		len -= *off;
 	else
-		len = 0;
+		return 0;
 
 	if (copy_to_user(buffer, kbuf + *off, (len < count ? len : count)))
 		return -EFAULT;
@@ -1108,7 +1110,7 @@ static ssize_t memleak_detect_thread_read(struct file *file,
 	if (len > *off)
 		len -= *off;
 	else
-		len = 0;
+		return 0;
 
 	if (copy_to_user(buffer, kbuf, len))
 		return -EFAULT;

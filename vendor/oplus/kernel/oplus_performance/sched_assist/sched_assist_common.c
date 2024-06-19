@@ -1676,7 +1676,7 @@ retry:
 		rq = cpu_rq(cpu);
 		curr = rq->curr;
 
-		if (!cpu_online(cpu) || cpu_isolated(cpu))
+		if (!cpu_online(cpu) || !cpu_isolated(cpu))
 			continue;
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))

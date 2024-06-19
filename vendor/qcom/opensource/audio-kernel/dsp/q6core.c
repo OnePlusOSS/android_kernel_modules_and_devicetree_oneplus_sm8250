@@ -474,6 +474,21 @@ static int32_t aprv2_core_fn_q(struct apr_client_data *data, void *priv)
 	case AVCS_CMD_RSP_LOAD_MODULES:
 		pr_debug("%s: Received AVCS_CMD_RSP_LOAD_MODULES\n",
 			 __func__);
+#ifdef OPLUS_ARCH_EXTENDS
+		/* Apply CR#3531543 to avoid use after free */
+		if (!rsp_payload)
+			return -EINVAL;
+#endif /*OPLUS_ARCH_EXTENDS*/
+
+#ifdef OPLUS_ARCH_EXTENDS
+		/* Apply CR#3454515 to validate payload size before access for AVCS */
+		if (data->payload_size != ((sizeof(struct avcs_load_unload_modules_sec_payload)
+			* rsp_payload->num_modules) + sizeof(uint32_t))) {
+			pr_err("%s: payload size greater than expected size %d\n",
+				__func__,data->payload_size);
+			return -EINVAL;
+		}
+#endif /*OPLUS_ARCH_EXTENDS*/
 		memcpy(rsp_payload, data->payload, data->payload_size);
 		q6core_lcl.avcs_module_resp_received = 1;
 		wake_up(&q6core_lcl.avcs_module_load_unload_wait);
@@ -998,6 +1013,11 @@ int32_t q6core_avcs_load_unload_modules(struct avcs_load_unload_modules_payload
 		return -ENOMEM;
 	}
 
+#ifdef OPLUS_ARCH_EXTENDS
+	/* Apply CR#3454515 to validate payload size before access for AVCS */
+	rsp_payload->num_modules = num_modules;
+#endif /*OPLUS_ARCH_EXTENDS*/
+
 	memcpy((uint8_t *)mod + sizeof(struct apr_hdr) +
 		sizeof(struct avcs_load_unload_modules_meminfo),
 		payload, payload_size);
@@ -1052,6 +1072,10 @@ int32_t q6core_avcs_load_unload_modules(struct avcs_load_unload_modules_payload
 done:
 	kfree(mod);
 	kfree(rsp_payload);
+#ifdef OPLUS_ARCH_EXTENDS
+	/* Apply CR#3531543 to avoid use after free */
+	rsp_payload = NULL;
+#endif /*OPLUS_ARCH_EXTENDS*/
 	mutex_unlock(&(q6core_lcl.cmd_lock));
 	return ret;
 }

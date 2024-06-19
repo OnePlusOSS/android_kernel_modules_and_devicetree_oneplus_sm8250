@@ -20,6 +20,7 @@
 #include <linux/remoteproc/qcom_rproc.h>
 #include <linux/rtc.h>
 #include <linux/device.h>
+#include <oplus_battery_log.h>
 #include "oplus_battery_sm8450.h"
 #include "../oplus_charger.h"
 #include "../oplus_gauge.h"
@@ -64,6 +65,11 @@
 #define OPLUS_USBTEMP_LOW_CURR 0
 #define OPLUS_USBTEMP_CURR_CHANGE_TEMP 3
 #define OPLUS_USBTEMP_CHANGE_RANGE_TIME 30
+
+#ifndef BATTERY_LOG_REG_MAX_SIZE
+#define BATTERY_LOG_REG_MAX_SIZE 100
+#endif
+char battlog_buck_ic_reg_info[BATTERY_LOG_REG_MAX_SIZE] = {0};
 
 struct oplus_chg_chip *g_oplus_chip = NULL;
 static struct task_struct *oplus_usbtemp_kthread;
@@ -7207,6 +7213,21 @@ static void dump_regs(void)
 		}
 	}
 	dump_count++;
+	memset(battlog_buck_ic_reg_info, 0, BATTERY_LOG_REG_MAX_SIZE);
+	if (oplus_chg_get_voocphy_support() == ADSP_VOOCPHY) {
+		snprintf(battlog_buck_ic_reg_info, BATTERY_LOG_REG_MAX_SIZE,
+				", %d, %d, %d, 0x%02x, %d, %d, 0x%02x, %d",
+				smbchg_get_charge_enable(),
+				bcdev->read_buffer_dump.data_buffer[9], bcdev->read_buffer_dump.data_buffer[11],
+				oplus_chg_get_charger_subtype(), bcdev->read_buffer_dump.data_buffer[10],
+				bcdev->read_buffer_dump.data_buffer[12], bcdev->cid_status, bcdev->usb_in_status);
+	} else {
+		snprintf(battlog_buck_ic_reg_info, BATTERY_LOG_REG_MAX_SIZE,
+				", %d, %d, %d, 0x%02x, %d",
+				smbchg_get_charge_enable(),
+				bcdev->read_buffer_dump.data_buffer[9], bcdev->read_buffer_dump.data_buffer[11],
+				oplus_chg_get_charger_subtype(), chip->is_abnormal_adapter);
+	}
 	return;
 }
 
@@ -11815,6 +11836,41 @@ static int oplus_chg_track_init(struct battery_chg_dev *bcdev)
 
 #endif
 
+static int buck_ic_dump_log_data(char *buffer, int size, void *dev_data)
+{
+	struct oplus_chg_chip *g_oplus_chip = dev_data;
+
+	if (!buffer || !g_oplus_chip)
+		return -ENOMEM;
+
+	strncpy(buffer, battlog_buck_ic_reg_info, sizeof(battlog_buck_ic_reg_info));
+
+	return 0;
+}
+
+static int buck_ic_get_log_head(char *buffer, int size, void *dev_data)
+{
+	struct oplus_chg_chip *g_oplus_chip = dev_data;
+
+	if (!buffer || !g_oplus_chip)
+		return -ENOMEM;
+	if (oplus_chg_get_voocphy_support() == ADSP_VOOCPHY) {
+		snprintf(buffer, size,
+			", [buck_ic]:chg_en, suspend, pd_svooc,subtype, oplus_UsbCommCapable,"
+			"typec_mode, cid_status, usb_in_status");
+	} else {
+		snprintf(buffer, size,
+			", [buck_ic]:chg_en, suspend, pd_svooc, subtype, is_abnormal_adapter");
+	}
+	return 0;
+}
+
+static struct battery_log_ops battlog_buck_ic_ops = {
+	.dev_name = "buck_ic",
+	.dump_log_head = buck_ic_get_log_head,
+	.dump_log_content = buck_ic_dump_log_data,
+};
+
 static int battery_chg_probe(struct platform_device *pdev)
 {
 #ifdef OPLUS_FEATURE_CHG_BASIC
@@ -12116,6 +12172,8 @@ static int battery_chg_probe(struct platform_device *pdev)
 	schedule_delayed_work(&bcdev->adsp_voocphy_enable_check_work,
 		round_jiffies_relative(msecs_to_jiffies(1500)));
 	schedule_delayed_work(&bcdev->mcu_en_init_work, 0);
+	battlog_buck_ic_ops.dev_data = (void *)oplus_chip;
+	battery_log_ops_register(&battlog_buck_ic_ops);
 	pr_info("battery_chg_probe end...\n");
 #endif
 	return 0;
