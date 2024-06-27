@@ -721,6 +721,8 @@
 		/* SW Support Feature Control */
 		health_monitor_v2_support;
 		black_gesture_support;
+		black_gesture_indep_support;
+		sportify_aod_gesture_support;
 		charger_pump_support;
 		fw_update_app_support;
 		smart_gesture_support;

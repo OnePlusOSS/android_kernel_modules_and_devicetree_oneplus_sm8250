@@ -1712,7 +1712,12 @@ static int32_t adm_callback(struct apr_client_data *data, void *priv)
 {
 	uint32_t *payload;
 	int port_idx, copp_idx, idx, client_id;
+#ifndef OPLUS_ARCH_EXTENDS
 	int num_modules;
+#else
+	/* Apply CR#3438425 to Resolve mem corruption in adm cb */
+	uint32_t num_modules;
+#endif /*OPLUS_ARCH_EXTENDS*/
 	int ret;
 
 	if (data == NULL) {

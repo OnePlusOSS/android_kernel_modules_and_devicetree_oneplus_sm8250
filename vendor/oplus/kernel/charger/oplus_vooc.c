@@ -1876,6 +1876,7 @@ static void oplus_vooc_fastchg_func(struct work_struct *work)
 			chip->fastchg_to_warm = false;
 			chip->fastchg_dummy_started = true;
 		}
+		oplus_chg_unsuspend_charger();
 	}
 	if (data == VOOC_NOTIFY_NORMAL_TEMP_FULL || data == VOOC_NOTIFY_BAD_CONNECTED ||
 	    (chip->support_fake_vooc_check && data == VOOC_NOTIFY_DATA_UNKNOWN)) {
@@ -3248,6 +3249,16 @@ bool oplus_vooc_get_reset_adapter_st(void)
 	} else {
 		return g_vooc_chip->reset_adapter;
 	}
+}
+
+void oplus_vooc_set_reset_adapter_false(void)
+{
+	if (!g_vooc_chip) {
+		return;
+	} else {
+		g_vooc_chip->reset_adapter = false;
+	}
+	return;
 }
 
 int oplus_vooc_get_abnormal_adapter_current_cnt(void)

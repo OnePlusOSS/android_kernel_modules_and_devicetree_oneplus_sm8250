@@ -27,6 +27,7 @@
 #include <linux/power_supply.h>
 #include <linux/iio/consumer.h>
 
+#include <linux/rtc.h>
 #include <linux/regulator/driver.h>
 #include <linux/regulator/of_regulator.h>
 #include <linux/regulator/machine.h>
@@ -104,7 +105,7 @@ int __attribute__((weak)) qpnp_get_prop_charger_voltage_now(void)
 
 #define DEFAULT_CV 4435
 #define SY6970_HVDCP_BC12_WORK_DELAY 1500
-#define VSYSMIN_3P5_VAL 5	/* Vsysmin 3.5V */
+#define VSYSMIN_DEFAULT_VAL 0	/* 5: Vsysmin 3.5V; 2:3.2V; 0:3.0v */
 
 #define OPLUS_BC12_RETRY_TIME             round_jiffies_relative(msecs_to_jiffies(200))
 #define OPLUS_BC12_RETRY_TIME_CDP         round_jiffies_relative(msecs_to_jiffies(400))
@@ -133,6 +134,12 @@ int __attribute__((weak)) qpnp_get_prop_charger_voltage_now(void)
 #define SW_AICL_POINT_VOL_5V_PHASE1 	4500
 #define SW_AICL_POINT_VOL_5V_PHASE2 	4550
 #define UNIT_TRANS_1000 1000
+
+/* for ovp bug, used to set cv normal 4465 or higher 4608 */
+#define VBUS_VALID_MV 3000
+#define MONITOR_CV_DELAY_MS 5000
+#define CV_COUNT 3
+#define VBUS_OFFLINE_COUNT_MAX 3
 
 static int sy6970_chg_dbg_enable = SY6970_ERR|SY6970_INFO|SY6970_DEBUG;
 module_param(sy6970_chg_dbg_enable, int, 0644);
@@ -227,6 +234,8 @@ struct sy6970 {
 	struct delayed_work init_work;
 	/*struct delayed_work enter_hz_work;*/
 	struct delayed_work sy6970_hvdcp_bc12_work;
+	/*Monitor the value of CV to ensure that it does not have a normal value*/
+	struct delayed_work sy6970_monitor_cv_work;
 #ifdef CONFIG_TCPC_CLASS
 	/*type_c_port0*/
 	struct tcpc_device *tcpc;
@@ -354,6 +363,13 @@ static int oplus_sy6970_get_vbus(void);
 static int oplus_sy6970_get_pd_type(void);
 static int oplus_sy6970_charger_suspend(void);
 void sy6970_reset_registers(struct sy6970 *bq, const char *buf, int count);
+
+/* for ovp bug, used to set cv normal 4465 or higher 4608 */
+static int sy6970_set_chargevolt(struct sy6970 *sy, int volt);
+static int sy6970_read_cv(struct sy6970 *bq);
+static int oplus_sy6970_set_cv(int cv);
+static int sy6970_adc_read_vbus_volt(struct sy6970 *sy);
+static void sy6970_cancel_cv_monitor_work(struct sy6970 *sy);
 
 #ifdef CONFIG_OPLUS_CHARGER_MTK
 static const struct charger_properties sy6970_chg_props = {
@@ -556,17 +572,13 @@ static int sy6970_disable_batfet_rst(struct sy6970 *bq)
 	return ret;
 }
 
-int sy6970_set_chargevolt(struct sy6970 *sy, int volt);
-static int sy6970_read_vreg(struct sy6970 *bq);
-int oplus_sy6970_set_cv(int cv);
-
 static int sy6970_enable_charger(struct sy6970 *bq)
 {
 	int ret = 0;
 	int cv_value = 0;
 	u8 val = SY6970_CHG_ENABLE << SY6970_CHG_CONFIG_SHIFT;
 
-	if (!bq) {
+	if (!bq || !g_oplus_chip) {
 		return 0;
 	}
 
@@ -577,13 +589,13 @@ static int sy6970_enable_charger(struct sy6970 *bq)
 	}
 
 	/*recovery cv when enable charge*/
-	cv_value = sy6970_read_vreg(bq);
-	pr_info("cv = %d", cv_value);
+	cv_value = sy6970_read_cv(bq);
+	pr_info("enable charger current cv = %d\n", cv_value);
 	if (bq->is_sy6970 && bq->set_cv_value &&
 	   (cv_value == bq->platform_data->fastchg_cv_for_ovp)) {
 		oplus_sy6970_set_cv(g_oplus_chip->limits.vfloat_sw_set);
 		bq->set_cv_value = false;
-		pr_info("set cv value to %d mv", g_oplus_chip->limits.vfloat_sw_set);
+		pr_info("set cv value to %d mv\n", g_oplus_chip->limits.vfloat_sw_set);
 	}
 
 	ret = sy6970_update_bits(bq, SY6970_REG_03,
@@ -615,10 +627,14 @@ static int sy6970_disable_charger(struct sy6970 *bq)
 
 	/*when start fast charge raise cv to aviod sy6970 ovp*/
 	if (bq->is_sy6970 && (oplus_vooc_get_fastchg_started() == true) &&
-	   (bq->platform_data->fastchg_cv_for_ovp != 0)) {
+	    (bq->platform_data->fastchg_cv_for_ovp > 0)) {
 		oplus_sy6970_set_cv(bq->platform_data->fastchg_cv_for_ovp);
 		bq->set_cv_value = true;
-		pr_info("enter fastchg set cv value to %d mv", bq->platform_data->fastchg_cv_for_ovp);
+		pr_info("enter fastchg set cv value to %d mv\n",
+				bq->platform_data->fastchg_cv_for_ovp);
+
+		cancel_delayed_work_sync(&bq->sy6970_monitor_cv_work);
+		schedule_delayed_work(&bq->sy6970_monitor_cv_work, 0);
 	}
 
 	chg_info("disable \n");
@@ -740,7 +756,7 @@ static int _sy6970_adc_read_vbus_volt(struct sy6970 *sy) {
 
 #define SY6970_INVALID_VBUS_MV	2600
 #define SY6970_VBUS_RETRY_MS	10
-int sy6970_adc_read_vbus_volt(struct sy6970 *sy)
+static int sy6970_adc_read_vbus_volt(struct sy6970 *sy)
 {
 	int ret = 0;
 	int retry = 20;
@@ -1102,8 +1118,9 @@ int sy6970_set_boost_current(struct sy6970 *bq, int curr)
 
 static int sy6970_vmin_limit(struct sy6970 *bq)
 {
-        u8 val = VSYSMIN_3P5_VAL << SY6970_SYS_MINV_SHIFT;
+        u8 val = VSYSMIN_DEFAULT_VAL << SY6970_SYS_MINV_SHIFT;
 
+        chg_info("vsysmin val = %d", val);
         return sy6970_update_bits(bq, SY6970_REG_03,
                                    SY6970_SYS_MINV_MASK, val);
 }
@@ -1325,7 +1342,7 @@ static struct sy6970_platform_data *sy6970_parse_dt(struct device_node *np,
 	ret = of_property_read_u32(np, "ti,sy6970,fastchg-cv-for-ovp",
 				 &pdata->fastchg_cv_for_ovp);
 	if (ret) {
-		pdata->fastchg_cv_for_ovp = 0;
+		pdata->fastchg_cv_for_ovp = -EINVAL;
 		pr_err("Failed to read node of ti,sy6970,fastchg-cv-for-ovp\n");
 	}
 
@@ -1705,6 +1722,7 @@ static irqreturn_t sy6970_irq_handler(int irq, void *data)
 		cancel_delayed_work_sync(&bq->sy6970_retry_adapter_detection);
 		cancel_delayed_work_sync(&bq->sy6970_aicr_setting_work);
 		cancel_delayed_work_sync(&bq->sy6970_hvdcp_bc12_work);
+		sy6970_cancel_cv_monitor_work(bq);
 		oplus_chg_wake_update_work();
 		chg_info("adapter/usb removed.");
 		oplus_chg_wakelock(bq, false);
@@ -3192,7 +3210,7 @@ void sy6970_really_suspend_charger(bool en)
 	return;
 }
 
-static int sy6970_read_vreg(struct sy6970 *bq)
+static int sy6970_read_cv(struct sy6970 *bq)
 {
 	u8 reg_val = 0;
 	int vchg = 0;
@@ -3311,6 +3329,7 @@ void sy6970_vooc_timeout_callback(bool vbus_rising)
 		oplus_set_usb_props_type(g_bq->oplus_chg_type);
 		oplus_chg_wakelock(g_bq, false);
 		sy6970_disable_watchdog_timer(g_bq);
+		sy6970_cancel_cv_monitor_work(g_bq);
 	}
 	sy6970_dump_regs(g_bq);
 }
@@ -3800,7 +3819,6 @@ static void oplus_mt_power_off(void)
 }
 #endif
 
-#define VBUS_VALID_MV	4000
 static void sy6970_init_work_handler(struct work_struct *work)
 {
 	int boot_mode = get_boot_mode();
@@ -3881,6 +3899,75 @@ static void sy6970_hvdcp_bc12_work_handler(struct work_struct *work)
 	sy6970_force_dpdm(g_bq, true);
 	sy6970_enable_auto_dpdm(g_bq,false);
 	return;
+}
+
+static void sy6970_cancel_cv_monitor_work(struct sy6970 *sy)
+{
+	int cv_value = 0;
+
+	if (!g_bq || !g_oplus_chip)
+		return;
+
+	cv_value = sy6970_read_cv(g_bq);
+	chg_info("get cv value = %d\n", cv_value);
+
+	if (cv_value == g_bq->platform_data->fastchg_cv_for_ovp)
+		oplus_sy6970_set_cv(g_oplus_chip->limits.vfloat_sw_set);
+
+	cancel_delayed_work_sync(&sy->sy6970_monitor_cv_work);
+}
+
+static void sy6970_monitor_cv_work_handler(struct work_struct *work)
+{
+	static int cv_count = 0;
+	static int vbus_offline_cnt = 0;
+	int cv_value = 0;
+	int vchg = 0;
+
+	if (!g_bq || !g_oplus_chip)
+		return;
+
+	cv_value = sy6970_read_cv(g_bq);
+	chg_info("enter get cv value = %d\n", cv_value);
+
+	if (oplus_vooc_get_fastchg_started() == false &&
+	    (cv_value == g_bq->platform_data->fastchg_cv_for_ovp)) {
+		cv_count++;
+		if (cv_count >= CV_COUNT) {
+			cv_count = 0;
+			oplus_sy6970_set_cv(g_oplus_chip->limits.vfloat_sw_set);
+			g_bq->set_cv_value = false;
+			chg_info("cv error,pre-value %d, now %d\n", cv_value,
+				g_oplus_chip->limits.vfloat_sw_set);
+		}
+	} else {
+		cv_count = 0;
+	}
+
+	/* check vbus drop three times during 15s, set cv to normal as 4465 */
+	vchg = sy6970_adc_read_vbus_volt(g_bq);
+	if (vchg < VBUS_VALID_MV) {
+		vbus_offline_cnt++;
+		if (vbus_offline_cnt >= VBUS_OFFLINE_COUNT_MAX) {
+			vbus_offline_cnt = 0;
+			oplus_sy6970_set_cv(g_oplus_chip->limits.vfloat_sw_set);
+			g_bq->set_cv_value = false;
+			chg_info("check vbus offline 3times, set cv normal %d\n",
+				g_oplus_chip->limits.vfloat_sw_set);
+		}
+	} else {
+		vbus_offline_cnt = 0;
+	}
+
+	cv_value = sy6970_read_cv(g_bq);
+	chg_info("exit get cv value = %d\n", cv_value);
+	if (cv_value != g_bq->platform_data->fastchg_cv_for_ovp) {
+		cv_count = 0;
+		vbus_offline_cnt = 0;
+	} else {
+		schedule_delayed_work(&g_bq->sy6970_monitor_cv_work,
+				msecs_to_jiffies(MONITOR_CV_DELAY_MS));
+	}
 }
 
 static int oplus_sy6970_get_vbus(void)
@@ -4213,6 +4300,7 @@ static int sy6970_charger_probe(struct i2c_client *client,
 	INIT_DELAYED_WORK(&bq->sy6970_retry_adapter_detection, retry_detection_work_callback);
 	INIT_DELAYED_WORK(&bq->init_work, sy6970_init_work_handler);
 	INIT_DELAYED_WORK(&bq->sy6970_hvdcp_bc12_work, sy6970_hvdcp_bc12_work_handler);
+	INIT_DELAYED_WORK(&bq->sy6970_monitor_cv_work, sy6970_monitor_cv_work_handler);
 	ret = sy6970_register_interrupt(node, bq);
 	if (ret) {
 		chg_err("Failed to register irq ret=%d\n", ret);
@@ -4303,11 +4391,50 @@ err_nodev:
 
 }
 
+static unsigned long suspend_tm_sec = 0;
+#define INVALID_TIME_VAL -1
+#define SLEEP_DURATION_THR 60
+static int get_rtc_time(unsigned long *rtc_time)
+{
+	struct rtc_time tm;
+	struct rtc_device *rtc;
+	int rc;
+
+	rtc = rtc_class_open(CONFIG_RTC_HCTOSYS_DEVICE);
+	if (rtc == NULL) {
+		pr_err("Failed to open rtc device (%s)\n",
+				CONFIG_RTC_HCTOSYS_DEVICE);
+		return -EINVAL;
+	}
+
+	rc = rtc_read_time(rtc, &tm);
+	if (rc) {
+		pr_err("Failed to read rtc time (%s) : %d\n",
+				CONFIG_RTC_HCTOSYS_DEVICE, rc);
+		goto close_time;
+	}
+
+	rc = rtc_valid_tm(&tm);
+	if (rc) {
+		pr_err("Invalid RTC time (%s): %d\n",
+				CONFIG_RTC_HCTOSYS_DEVICE, rc);
+		goto close_time;
+	}
+	rtc_tm_to_time(&tm, rtc_time);
+
+	close_time:
+		rtc_class_close(rtc);
+		return rc;
+}
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0))
 static int sy6970_pm_resume(struct device *dev)
 {
 	struct sy6970 *chip = NULL;
 	struct i2c_client *client = to_i2c_client(dev);
+	unsigned long resume_tm_sec = 0;
+	unsigned long sleep_time = 0;
+	int rc = 0;
 
 	chg_err(" suspend stop \n");
 	if (client) {
@@ -4316,6 +4443,16 @@ static int sy6970_pm_resume(struct device *dev)
 			chg_err(" set charger_suspended as 0\n");
 			atomic_set(&chip->charger_suspended, 0);
 			wake_up_interruptible(&g_bq->wait);
+
+			rc = get_rtc_time(&resume_tm_sec);
+			if (rc || suspend_tm_sec == INVALID_TIME_VAL) {
+				chg_err("RTC read failed\n");
+				sleep_time = 0;
+			} else {
+				sleep_time = resume_tm_sec - suspend_tm_sec;
+			}
+			if ((resume_tm_sec > suspend_tm_sec) && (sleep_time > SLEEP_DURATION_THR))
+				oplus_chg_soc_update_when_resume(sleep_time);
 		}
 	}
 	return 0;
@@ -4332,6 +4469,10 @@ static int sy6970_pm_suspend(struct device *dev)
 		if (chip) {
 			chg_err(" set charger_suspended as 1\n");
 			atomic_set(&chip->charger_suspended, 1);
+			if (get_rtc_time(&suspend_tm_sec)) {
+				chg_err("RTC read failed\n");
+				suspend_tm_sec = INVALID_TIME_VAL;
+			}
 		}
 	}
 	return 0;
@@ -4344,28 +4485,42 @@ static const struct dev_pm_ops sy6970_pm_ops = {
 #else
 static int sy6970_resume(struct i2c_client *client)
 {
-       	struct sy6970 *chip = i2c_get_clientdata(client);
+	struct sy6970 *chip = i2c_get_clientdata(client);
+	unsigned long resume_tm_sec = 0;
+	unsigned long sleep_time = 0;
+	int rc = 0;
 
-        if (!chip) {
-                return 0;
-        }
+	if (!chip)
+		return 0;
 
-        atomic_set(&chip->charger_suspended, 0);
+	atomic_set(&chip->charger_suspended, 0);
+	rc = get_rtc_time(&resume_tm_sec);
+	if (rc || suspend_tm_sec == INVALID_TIME_VAL) {
+		chg_err("RTC read failed\n");
+		sleep_time = 0;
+	} else {
+		sleep_time = resume_tm_sec - suspend_tm_sec;
+	}
+	if ((resume_tm_sec > suspend_tm_sec) && (sleep_time > SLEEP_DURATION_THR))
+		oplus_chg_soc_update_when_resume(sleep_time);
 
-        return 0;
+	return 0;
 }
 
 static int sy6970_suspend(struct i2c_client *client, pm_message_t mesg)
 {
-        struct sy6970 *chip = i2c_get_clientdata(client);
+	struct sy6970 *chip = i2c_get_clientdata(client);
 
-        if (!chip) {
-                return 0;
-        }
+	if (!chip)
+		return 0;
 
-        atomic_set(&chip->charger_suspended, 1);
+	atomic_set(&chip->charger_suspended, 1);
+	if (get_rtc_time(&suspend_tm_sec)) {
+		chg_err("RTC read failed\n");
+		suspend_tm_sec = INVALID_TIME_VAL;
+	}
 
-        return 0;
+	return 0;
 }
 #endif
 

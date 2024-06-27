@@ -377,7 +377,7 @@ static void handle_oem_read_buffer(struct battery_chg_dev *bcdev,
 		bcdev->read_buffer_dump.data_buffer[3], bcdev->read_buffer_dump.data_buffer[4], bcdev->read_buffer_dump.data_buffer[5],
 		bcdev->read_buffer_dump.data_buffer[6], bcdev->read_buffer_dump.data_buffer[7], bcdev->read_buffer_dump.data_buffer[8],
 		bcdev->read_buffer_dump.data_buffer[9], bcdev->read_buffer_dump.data_buffer[10], bcdev->read_buffer_dump.data_buffer[11],
-		bcdev->read_buffer_dump.data_buffer[12]);*/
+		bcdev->read_buffer_dump.data_buffer[12],bcdev->read_buffer_dump.data_buffer[14]);*/
 	if (is_ext_chg_ops() && bcdev->read_buffer_dump.data_buffer[9] == 0) {
 		schedule_delayed_work(&bcdev->suspend_check_work, round_jiffies_relative(msecs_to_jiffies(0)));
 	}
@@ -1441,9 +1441,10 @@ static void oplus_check_charger_out_func(struct work_struct *work)
 			oplus_vooc_get_fastchg_dummy_started(), chg_vol);
 	if (chg_vol >= 0 && chg_vol < 2000) {
 		oplus_adsp_voocphy_clear_status();
+		oplus_chg_clear_abnormal_adapter_var();
 		if (pst_batt->psy)
 			power_supply_changed(pst_batt->psy);
-		printk(KERN_ERR, "charger out, chg_vol:%d\n", chg_vol);
+		chg_err("charger out, chg_vol:%d\n", chg_vol);
 	}
 }
 
@@ -2088,6 +2089,10 @@ static void handle_notification(struct battery_chg_dev *bcdev, void *data,
 		g_oplus_chip->pd_svooc = true;
 		printk(KERN_ERR "!!!:%s, pd_svooc[%d]\n", __func__, bcdev->pd_svooc);
 		break;
+	case BC_ABNORMAL_PD_SVOOC_ADAPTER:
+		printk(KERN_ERR "!!!:%s, is_abnormal_adapter\n", __func__);
+		g_oplus_chip->is_abnormal_adapter = true;
+		break;
 	case BC_VOOC_STATUS_GET:
 		schedule_delayed_work(&bcdev->adsp_voocphy_status_work, 0);
 		break;
@@ -2538,6 +2543,7 @@ static int usb_psy_get_prop(struct power_supply *psy,
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	static int online = 0;
 	static int adap_type = 0;
+	struct oplus_chg_chip *chip = g_oplus_chip;
 #endif
 
 	pval->intval = -ENODATA;
@@ -2591,8 +2597,12 @@ static int usb_psy_get_prop(struct power_supply *psy,
 		if (online ^ pval->intval) {
 			bcdev->pre_current = -1;
 			online = pval->intval;
-			printk(KERN_ERR "!!!!! usb online: [%d]\n", online);
+			printk(KERN_ERR "!!!!! usb online: [%d], abnormal_adapter_info [%d %d]\n", online,
+			chip->is_abnormal_adapter, chip->support_abnormal_adapter);
 			oplus_chg_track_check_wired_charging_break(online);
+			if (chip->support_abnormal_adapter) {
+				oplus_chg_check_break(online);
+			}
 			bcdev->real_chg_type = POWER_SUPPLY_TYPE_UNKNOWN;
 			if (!is_ext_chg_ops() && oplus_chg_get_voocphy_support() == ADSP_VOOCPHY) {
 				oplus_chg_wake_update_work();
@@ -4891,6 +4901,27 @@ static void oplus_usbtemp_recover_work(struct work_struct *work)
 	oplus_usbtemp_recover_func(g_oplus_chip);
 }
 
+#define ICHARGING_MIN_MA -50
+static void zy0603_reset_fg_balance_work(struct work_struct *work)
+{
+	int rc = 0;
+	struct battery_chg_dev *bcdev = NULL;
+	struct psy_state *pst = NULL;
+
+	if (!g_oplus_chip) {
+		chg_err("g_oplus_chip is NULL!\n");
+		return;
+	}
+	bcdev = g_oplus_chip->pmic_spmi.bcdev_chip;
+	pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
+
+	if (g_oplus_chip->icharging > ICHARGING_MIN_MA)
+		return;
+	rc = write_property_id(bcdev, pst, BATT_ZY0603_RESET_FG_BALANCE, 1);
+	if (rc)
+		chg_err("zy0603_reset_fg_balance fail, rc=%d\n", rc);
+}
+
 static int g_tbatt_temp = 0;
 
 #define USBTEMP_BATTTEMP_GAP_HIGH 19
@@ -5074,9 +5105,14 @@ static void oplus_cid_status_change_work(struct work_struct *work)
 
 	cid_status = pst->prop[USB_CID_STATUS];
 	printk(KERN_ERR "%s: !!!cid_status[%d]\n", __func__, cid_status);
+	if (cid_status == 1) {
+		cancel_delayed_work(&bcdev->reset_fg_balance_work);
+		schedule_delayed_work(&bcdev->reset_fg_balance_work, msecs_to_jiffies(10000));
+	}
 	if (cid_status == 0) {
 		bcdev->pre_current = -1;
 		chip->usbtemp_check = false;
+		oplus_chg_clear_abnormal_adapter_var();
 		usbtemp_reset_variables();
 	}
 
@@ -8495,10 +8531,10 @@ static void dump_regs(void)
 				bcdev->read_buffer_dump.data_buffer[extra_num + 33], bcdev->read_buffer_dump.data_buffer[extra_num + 34],
 				bcdev->read_buffer_dump.data_buffer[extra_num + 35], bcdev->read_buffer_dump.data_buffer[extra_num + 36]);
 		} else {
-			printk(KERN_ERR "sm8350_st_dump: [chg_en=%d, suspend=%d, pd_svooc=%d, subtype=0x%02x],\n",
+			printk(KERN_ERR "sm8350_st_dump: [chg_en=%d, suspend=%d, pd_svooc=%d, subtype=0x%02x, is_abnormal_adapter=%d],\n",
 				smbchg_get_charge_enable(),
 				bcdev->read_buffer_dump.data_buffer[9], bcdev->read_buffer_dump.data_buffer[11],
-				oplus_chg_get_charger_subtype());
+				oplus_chg_get_charger_subtype(), chip->is_abnormal_adapter);
 		}
 	}
 	dump_count++;
@@ -9076,6 +9112,83 @@ read_parameter:
 	return 0;
 }
 
+static bool fg_zy0603_check_rc_sfr(void)
+{
+	int rc = 0;
+	struct battery_chg_dev *bcdev = NULL;
+	struct psy_state *pst = NULL;
+	struct oplus_chg_chip *chip = g_oplus_chip;
+
+	if (!chip) {
+		return false;
+	}
+
+	bcdev = chip->pmic_spmi.bcdev_chip;
+	pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
+
+	rc = read_property_id(bcdev, pst, BATT_ZY0603_CHECK_RC_SFR);
+	if (rc < 0) {
+		chg_err("read sfr fail, rc=%d\n", rc);
+		return false;
+	}
+	chg_err("read sfr success, sfr err=%d\n", pst->prop[BATT_ZY0603_CHECK_RC_SFR]);
+
+	if(pst->prop[BATT_ZY0603_CHECK_RC_SFR]) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+static int fg_zy0603_soft_reset(void)
+{
+	int rc = 0;
+	struct battery_chg_dev *bcdev = NULL;
+	struct psy_state *pst = NULL;
+
+	if (!g_oplus_chip) {
+		chg_err("g_oplus_chip is NULL!\n");
+		return -1;
+	}
+	bcdev = g_oplus_chip->pmic_spmi.bcdev_chip;
+	pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
+
+	rc = write_property_id(bcdev, pst, BATT_ZY0603_SOFT_RESET, 1);
+	if (rc) {
+		chg_err("soft reset fail, rc=%d\n", rc);
+		return -1;
+	}
+
+	return 0;
+}
+
+static bool fg_zy0603_get_afi_update_done(void)
+{
+	int rc = 0;
+	struct battery_chg_dev *bcdev = NULL;
+	struct psy_state *pst = NULL;
+	struct oplus_chg_chip *chip = g_oplus_chip;
+
+	if (!chip) {
+		return false;
+	}
+
+	bcdev = chip->pmic_spmi.bcdev_chip;
+	pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
+
+	rc = read_property_id(bcdev, pst, BATT_AFI_UPDATE_DONE);
+	if (rc < 0) {
+		chg_err("read afi update fail, rc=%d\n", rc);
+		return false;
+	}
+	chg_err("read afi update success, afi update done=%d\n", pst->prop[BATT_AFI_UPDATE_DONE]);
+	if(pst->prop[BATT_AFI_UPDATE_DONE]) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 static int fg_bq28z610_get_battery_balancing_status(void)
 {
 	return 0;
@@ -9108,6 +9221,9 @@ static struct oplus_gauge_operations battery_gauge_ops = {
 	.get_battery_cb_status = fg_bq28z610_get_battery_balancing_status,
 	.get_bcc_parameters = oplus_get_bcc_parameters_from_adsp,
 	.set_bcc_parameters = oplus_set_bcc_debug_parameters,
+	.check_rc_sfr = fg_zy0603_check_rc_sfr,
+	.soft_reset_rc_sfr = fg_zy0603_soft_reset,
+	.afi_update_done = fg_zy0603_get_afi_update_done,
 };
 #endif /* OPLUS_FEATURE_CHG_BASIC */
 
@@ -9490,6 +9606,7 @@ static int battery_chg_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&bcdev->unsuspend_usb_work, oplus_unsuspend_usb_work);
 	INIT_DELAYED_WORK(&bcdev->reset_turn_on_chg_work, oplus_reset_turn_on_chg_work);
 	INIT_DELAYED_WORK(&bcdev->get_real_chg_type_work, oplus_get_real_chg_type_work);
+	INIT_DELAYED_WORK(&bcdev->reset_fg_balance_work, zy0603_reset_fg_balance_work);
 #endif
 #ifdef OPLUS_FEATURE_CHG_BASIC
 	INIT_DELAYED_WORK(&bcdev->vchg_trig_work, oplus_vchg_trig_work);

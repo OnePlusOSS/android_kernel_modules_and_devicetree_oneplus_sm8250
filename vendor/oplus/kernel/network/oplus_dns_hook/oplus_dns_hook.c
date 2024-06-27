@@ -189,7 +189,7 @@ static int parse_querys(char *start, u32 payload_len, int *querys_len,
 
 		tmpLen = *(start + offset);
 
-		LOGK(0, "tmpurl %s strlen:%u, tmpLen:%d", tmpurl, strlen(tmpurl), tmpLen);
+		LOGK(0, "tmpurl %s strlen:%lu, tmpLen:%d", tmpurl, strlen(tmpurl), tmpLen);
 		do {
 			if (tmpLen > (urlLen - len)) {
 				LOGK(1, "len invalid! %d-%lu-%d", tmpLen, urlLen, len);
@@ -689,6 +689,9 @@ static struct genl_family oplus_dns_hook_genl_family = {
 	.maxattr = OPLUS_DNS_HOOK_MSG_MAX,
 	.ops = oplus_dns_hook_genl_ops,
 	.n_ops = ARRAY_SIZE(oplus_dns_hook_genl_ops),
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
+	.resv_start_op = OPLUS_DNS_HOOK_CMD_NOTIFY + 1,
+#endif
 };
 
 static inline int genl_msg_prepare_usr_msg(u8 cmd, size_t size, pid_t pid,

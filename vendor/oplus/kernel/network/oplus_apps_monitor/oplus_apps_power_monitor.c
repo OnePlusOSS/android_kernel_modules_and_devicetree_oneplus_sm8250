@@ -470,8 +470,8 @@ void oplus_app_monitor_send_app_info_report(void)
 	if (ret) {
 		printk("[app_monitor]:send app info report error!\n");
 	} else {
-		printk("[app_monitor]:send app info report success!now=%lld, now_jiffies=%u\n",
-		       (long long)now_tv.tv_sec, tcp_time_stamp);
+		printk("[app_monitor]:send app info report success!now=%lld",
+		       (long long)now_tv.tv_sec);
 		print_report_info(report_msg);
 	}
 

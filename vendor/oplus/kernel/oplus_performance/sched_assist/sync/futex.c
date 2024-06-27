@@ -287,20 +287,29 @@ static int get_lock_stats_grp_idx(struct task_struct *task)
 	rcu_read_unlock();
 	return ret;
 }
+
+static inline bool curr_is_ux_thread_nolimit()
+{
+	int state = get_ux_state_type(current);
+
+	return (state == UX_STATE_INHERIT) || (state == UX_STATE_SCHED_ASSIST);
+}
+
 void locking_vh_do_futex_handler(void *unused, int cmd,
 		  unsigned int *flags, u32 __user *uaddr2)
 {
 	unsigned long waiter_pid, holder_pid;
-	char wake_msg[WAKE_MSG];
 	struct futex_uinfo info;
 	struct task_struct *leader;
-	int grp_idx, state;
+	int grp_idx;
+	bool do_something;
 
 	switch (cmd) {
 	case FUTEX_WAIT:
 		fallthrough;
 	case FUTEX_WAIT_BITSET:
-		if (NULL != uaddr2) {
+		do_something = (NULL != uaddr2) && (thread_info_ctrl || curr_is_ux_thread_nolimit());
+		if (do_something) {
 			if (copy_from_user(&info, uaddr2, sizeof(info))) {
 				cond_trace_printk(locking_opt_debug(LK_DEBUG_FTRACE),
 						"copy from user failed, uaddr2 = 0x%lx \n",
@@ -308,46 +317,40 @@ void locking_vh_do_futex_handler(void *unused, int cmd,
 				return;
 			}
 			memset(&info.inform_user, 0, sizeof(info.inform_user));
-			/* owner_tid part:*/
 			if ((info.cmd & MAGIC_MASK) == MAGIC_NUM) {
+				/* A. owner_tid part */
 				if (info.cmd & OWNER_BIT) {
 					/* owner_tid != 0 indicate that there is an owner to be set. */
 					if (info.owner_tid > 0 && info.owner_tid <= PID_MAX_LIMIT) {
 						*flags += info.owner_tid << FLAGS_OWNER_SHIFT;
 						cond_trace_printk(locking_opt_debug(LK_DEBUG_FTRACE),
-							"[Thread info:]current(%-12s pid=%d tgid=%d) holder_pid=%lu flag=%u \n",
+							"owner bit, current=%-12s, pid=%d, tgid=%d, holder_pid=%lu, flag=%u \n",
 							current->comm, current->pid, current->tgid, info.owner_tid, *flags);
-					} else {
-						pr_err("Set owner failed, invailid tid.\n");
 					}
 				}
-				if (thread_info_ctrl) {
-					/* identify thread attribute part.*/
-					if (info.cmd & THREAD_INFO_BIT) {
-						state = get_ux_state_type(current);
-						if ((state == UX_STATE_INHERIT) || (state == UX_STATE_SCHED_ASSIST))
-							info.inform_user |= UX_FLAG_BIT;
 
-						leader = current->group_leader;
-						if (leader) {
-							if (leader->ux_im_flag == IM_FLAG_SYSTEMSERVER_PID)
-								info.inform_user |= SS_FLAG_BIT;
-						}
+				/* B. identify thread attribute part */
+				if (info.cmd & THREAD_INFO_BIT) {
+					if (curr_is_ux_thread_nolimit())
+						info.inform_user |= UX_FLAG_BIT;
 
-						grp_idx = get_lock_stats_grp_idx(current);
-						info.inform_user |= grp_idx;
+					leader = current->group_leader;
+					if (leader && (leader->ux_im_flag == IM_FLAG_SYSTEMSERVER_PID))
+						info.inform_user |= SS_FLAG_BIT;
 
-						cond_trace_printk(locking_opt_debug(LK_DEBUG_FTRACE)
-								&& (info.inform_user & (UX_FLAG_BIT | SS_FLAG_BIT)),
-								"[Thread info:] comm = %s, pid = %d, ux = %d, ss = %d, grp = %d \n",
-								current->comm, current->pid,
-								!!(info.inform_user & UX_FLAG_BIT),
-								!!(info.inform_user & SS_FLAG_BIT), grp_idx >> GRP_SHIFT);
+					grp_idx = get_lock_stats_grp_idx(current);
+					info.inform_user |= grp_idx;
 
-						if (copy_to_user(uaddr2, &info, sizeof(struct futex_uinfo))) {
-							pr_err("copy to user failed. \n");
-							return;
-						}
+					cond_trace_printk(locking_opt_debug(LK_DEBUG_FTRACE)
+							&& (info.inform_user & (UX_FLAG_BIT | SS_FLAG_BIT)),
+							"thread info bit, comm=%s, pid=%d, ux=%d, ss=%d, grp=%d \n",
+							current->comm, current->pid,
+							!!(info.inform_user & UX_FLAG_BIT),
+							!!(info.inform_user & SS_FLAG_BIT), grp_idx >> GRP_SHIFT);
+
+					if (copy_to_user(uaddr2, &info, sizeof(struct futex_uinfo))) {
+						pr_err("copy to user failed. \n");
+						return;
 					}
 				}
 			}
@@ -359,9 +362,6 @@ void locking_vh_do_futex_handler(void *unused, int cmd,
 		futex_notify_waiter(waiter_pid);
 		break;
 	case FUTEX_WAKE:
-		if ((uaddr2 != NULL) && !copy_from_user(wake_msg, uaddr2, WAKE_MSG - 1))
-			wake_msg[WAKE_MSG-1] = '\0';
-
 		break;
 	}
 }

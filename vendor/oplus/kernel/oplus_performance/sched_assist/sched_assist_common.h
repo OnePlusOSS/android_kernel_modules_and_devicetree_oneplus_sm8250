@@ -184,88 +184,89 @@ extern int sysctl_input_boost_enabled;
 extern int sysctl_sched_assist_ib_duration_coedecay;
 extern u64 sched_assist_input_boost_duration;
 extern int ux_prefer_cpu[];
-extern void ux_init_rq_data(struct rq *rq);
-extern void ux_init_cpu_data(void);
+noinline int tracing_mark_write(const char *buf);
+void ux_init_rq_data(struct rq *rq);
+void ux_init_cpu_data(void);
 #ifdef CONFIG_OPLUS_FEATURE_SCHED_SPREAD
-extern void init_rq_cpu(int cpu);
+void init_rq_cpu(int cpu);
 #endif
 
-extern bool test_list_pick_ux(struct task_struct *task);
-extern void enqueue_ux_thread(struct rq *rq, struct task_struct *p);
-extern void dequeue_ux_thread(struct rq *rq, struct task_struct *p);
-extern void pick_ux_thread(struct rq *rq, struct task_struct **p, struct sched_entity **se);
+bool test_list_pick_ux(struct task_struct *task);
+void enqueue_ux_thread(struct rq *rq, struct task_struct *p);
+void dequeue_ux_thread(struct rq *rq, struct task_struct *p);
+void pick_ux_thread(struct rq *rq, struct task_struct **p, struct sched_entity **se);
 
-extern void inherit_ux_dequeue(struct task_struct *task, int type);
-extern void inherit_ux_dequeue_refs(struct task_struct *task, int type, int value);
-extern void inherit_ux_enqueue(struct task_struct *task, int type, int depth);
-extern void inherit_ux_inc(struct task_struct *task, int type);
-extern void inherit_ux_sub(struct task_struct *task, int type, int value);
+void inherit_ux_dequeue(struct task_struct *task, int type);
+void inherit_ux_dequeue_refs(struct task_struct *task, int type, int value);
+void inherit_ux_enqueue(struct task_struct *task, int type, int depth);
+void inherit_ux_inc(struct task_struct *task, int type);
+void inherit_ux_sub(struct task_struct *task, int type, int value);
 
-extern void set_inherit_ux(struct task_struct *task, int type, int depth, int inherit_val);
-extern void reset_inherit_ux(struct task_struct *inherit_task, struct task_struct *ux_task, int reset_type);
-extern void unset_inherit_ux(struct task_struct *task, int type);
-extern void unset_inherit_ux_value(struct task_struct *task, int type, int value);
-extern void inc_inherit_ux_refs(struct task_struct *task, int type);
+void set_inherit_ux(struct task_struct *task, int type, int depth, int inherit_val);
+void reset_inherit_ux(struct task_struct *inherit_task, struct task_struct *ux_task, int reset_type);
+void unset_inherit_ux(struct task_struct *task, int type);
+void unset_inherit_ux_value(struct task_struct *task, int type, int value);
+void inc_inherit_ux_refs(struct task_struct *task, int type);
 
-extern bool test_task_ux(struct task_struct *task);
-extern bool test_task_ux_depth(int ux_depth);
-extern bool test_inherit_ux(struct task_struct *task, int type);
-extern bool test_set_inherit_ux(struct task_struct *task);
-extern int get_ux_state_type(struct task_struct *task);
+bool test_task_ux(struct task_struct *task);
+bool test_task_ux_depth(int ux_depth);
+bool test_inherit_ux(struct task_struct *task, int type);
+bool test_set_inherit_ux(struct task_struct *task);
+int get_ux_state_type(struct task_struct *task);
 
-extern bool test_ux_task_cpu(int cpu);
-extern bool test_ux_prefer_cpu(struct task_struct *task, int cpu);
-extern void find_ux_task_cpu(struct task_struct *task, int *target_cpu);
-extern void oplus_boost_kill_signal(int sig, struct task_struct *cur, struct task_struct *p);
+bool test_ux_task_cpu(int cpu);
+bool test_ux_prefer_cpu(struct task_struct *task, int cpu);
+void find_ux_task_cpu(struct task_struct *task, int *target_cpu);
+void oplus_boost_kill_signal(int sig, struct task_struct *cur, struct task_struct *p);
 static inline void find_slide_boost_task_cpu(struct task_struct *task, int *target_cpu) {}
 
-extern void sched_assist_systrace_pid(pid_t pid, int val, const char *fmt, ...);
+void sched_assist_systrace_pid(pid_t pid, int val, const char *fmt, ...);
 #define SA_SYSTRACE_MAGIC 123
 #define sched_assist_systrace(...)  sched_assist_systrace_pid(SA_SYSTRACE_MAGIC, __VA_ARGS__)
 
 bool should_force_adjust_vruntime(struct sched_entity *se);
-extern void place_entity_adjust_ux_task(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial);
-extern bool should_ux_task_skip_further_check(struct sched_entity *se);
-extern bool should_ux_preempt_wakeup(struct task_struct *wake_task, struct task_struct *curr_task);
-extern bool should_ux_task_skip_cpu(struct task_struct *task, unsigned int cpu);
-extern void set_ux_task_to_prefer_cpu(struct task_struct *task, int *orig_target_cpu);
-extern int set_ux_task_cpu_common_by_prio(struct task_struct *task, int *target_cpu, bool boost, bool prefer_idle, unsigned int type);
-extern bool ux_skip_sync_wakeup(struct task_struct *task, int *sync);
-extern void set_ux_task_to_prefer_cpu_v1(struct task_struct *task, int *orig_target_cpu, bool *cond);
-extern bool im_mali(struct task_struct *p);
-extern bool cgroup_check_set_sched_assist_boost(struct task_struct *p);
-extern int get_st_group_id(struct task_struct *task);
-extern void cgroup_set_sched_assist_boost_task(struct task_struct *p);
+void place_entity_adjust_ux_task(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial);
+bool should_ux_task_skip_further_check(struct sched_entity *se);
+bool should_ux_preempt_wakeup(struct task_struct *wake_task, struct task_struct *curr_task);
+bool should_ux_task_skip_cpu(struct task_struct *task, unsigned int cpu);
+void set_ux_task_to_prefer_cpu(struct task_struct *task, int *orig_target_cpu);
+int set_ux_task_cpu_common_by_prio(struct task_struct *task, int *target_cpu, bool boost, bool prefer_idle, unsigned int type);
+bool ux_skip_sync_wakeup(struct task_struct *task, int *sync);
+void set_ux_task_to_prefer_cpu_v1(struct task_struct *task, int *orig_target_cpu, bool *cond);
+bool im_mali(struct task_struct *p);
+bool cgroup_check_set_sched_assist_boost(struct task_struct *p);
+int get_st_group_id(struct task_struct *task);
+void cgroup_set_sched_assist_boost_task(struct task_struct *p);
 #ifdef CONFIG_OPLUS_FEATURE_SCHED_SPREAD
-extern void inc_ld_stats(struct task_struct *tsk, struct rq *rq);
-extern void dec_ld_stats(struct task_struct *tsk, struct rq *rq);
-extern void update_load_flag(struct task_struct *tsk, struct rq *rq);
+void inc_ld_stats(struct task_struct *tsk, struct rq *rq);
+void dec_ld_stats(struct task_struct *tsk, struct rq *rq);
+void update_load_flag(struct task_struct *tsk, struct rq *rq);
 
-extern int task_lb_sched_type(struct task_struct *tsk);
-extern unsigned long reweight_cgroup_task(u64 slice, struct sched_entity *se, unsigned long task_weight, struct load_weight *lw);
+int task_lb_sched_type(struct task_struct *tsk);
+unsigned long reweight_cgroup_task(u64 slice, struct sched_entity *se, unsigned long task_weight, struct load_weight *lw);
 #if !defined(CONFIG_OPLUS_SYSTEM_KERNEL_QCOM) || (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
-extern void sched_assist_spread_tasks(struct task_struct *p, cpumask_t new_allowed_cpus,
+void sched_assist_spread_tasks(struct task_struct *p, cpumask_t new_allowed_cpus,
 		int start_cpu, int skip_cpu, cpumask_t *cpus, bool strict);
 #else
-extern void sched_assist_spread_tasks(struct task_struct *p, cpumask_t new_allowed_cpus,
+void sched_assist_spread_tasks(struct task_struct *p, cpumask_t new_allowed_cpus,
 		int order_index, int end_index, int skip_cpu, cpumask_t *cpus, bool strict);
 #endif
-extern bool should_force_spread_tasks(void);
-extern u64 sa_calc_delta(struct sched_entity *se, u64 delta_exec, unsigned long weight, struct load_weight *lw, bool calc_fair);
-extern void update_rq_nr_imbalance(int cpu);
+bool should_force_spread_tasks(void);
+u64 sa_calc_delta(struct sched_entity *se, u64 delta_exec, unsigned long weight, struct load_weight *lw, bool calc_fair);
+void update_rq_nr_imbalance(int cpu);
 #endif /* CONFIG_OPLUS_FEATURE_SCHED_SPREAD */
 
 #ifdef CONFIG_OPLUS_FEATURE_AUDIO_OPT
-extern void update_sa_task_stats(struct task_struct *tsk, u64 delta_ns, int stats_type);
-extern void sched_assist_im_systrace_c(struct task_struct *tsk, int tst_type);
-extern void sched_assist_update_record(struct task_struct *p, u64 delta_ns, int stats_type);
-extern bool sched_assist_pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity **se);
-extern void sched_assist_im_systrace_c(struct task_struct *tsk, int tst_type);
+void update_sa_task_stats(struct task_struct *tsk, u64 delta_ns, int stats_type);
+void sched_assist_im_systrace_c(struct task_struct *tsk, int tst_type);
+void sched_assist_update_record(struct task_struct *p, u64 delta_ns, int stats_type);
+bool sched_assist_pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity **se);
+void sched_assist_im_systrace_c(struct task_struct *tsk, int tst_type);
 #endif
 
-extern bool test_task_identify_ux(struct task_struct *task, int id_type_ux);
+bool test_task_identify_ux(struct task_struct *task, int id_type_ux);
 #ifdef CONFIG_SCHED_WALT
-extern bool sched_assist_task_misfit(struct task_struct *task, int cpu, int flag);
+bool sched_assist_task_misfit(struct task_struct *task, int cpu, int flag);
 #else
 static inline bool sched_assist_task_misfit(struct task_struct *task, int cpu, int flag) { return false; }
 #endif

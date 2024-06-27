@@ -478,6 +478,7 @@ enum {
 	CHIP_ID_DEFAULT = 0,
 	CHIP_ID_SC8547,
 	CHIP_ID_HL7138,
+	CHIP_ID_NU2112A,
 };
 
 enum oplus_voocphy_ovp_ctrl {
@@ -599,8 +600,6 @@ struct oplus_voocphy_manager {
 	unsigned int vooc_cool_down_num;
 	unsigned int current_default;
 	unsigned int current_expect;
-	unsigned int current_bcc_max;
-	unsigned int current_bcc_min;
 	unsigned int current_bcc_ext;
 	unsigned int current_max;
 	unsigned int current_spec;
@@ -865,12 +864,17 @@ struct oplus_voocphy_operations {
 	int (*clear_interrupts)(struct oplus_voocphy_manager *chip);
 	int (*get_voocphy_enable)(struct oplus_voocphy_manager *chip, u8 *data);
 	void (*dump_voocphy_reg)(struct oplus_voocphy_manager *chip);
+	int (*upload_cp_error)(struct oplus_voocphy_manager *chip, int err_type);
 	int (*set_dpdm_enable)(struct oplus_voocphy_manager *chip, bool enable);
 	int (*adsp_reset_voocphy)(void);
 	int (*get_chip_id)(void);
 	int (*adsp_force_svooc)(bool enable);
 	int (*get_adsp_voocphy_enable)(void);
 	int (*reset_voocphy_ovp)(struct oplus_voocphy_manager *chip);
+	int (*set_chg_pmid2out)(bool enable);
+	bool (*get_chg_pmid2out)(void);
+	int (*clk_err_clean)(void);
+	void (*set_fix_mode)(bool val);
 };
 
 #define VOOCPHY_LOG_BUF_LEN 1024
@@ -930,6 +934,11 @@ void oplus_voocphy_set_pdqc_config(void);
 int oplus_voocphy_get_adapter_type(void);
 void oplus_voocphy_set_pdsvooc_adapter_config(struct oplus_voocphy_manager *chip, bool enable);
 bool oplus_voocphy_get_pdsvooc_adapter_config(struct oplus_voocphy_manager *chip);
+void oplus_voocphy_clk_err_clean(void);
+void oplus_voocphy_set_chg_pmid2out(bool enable);
+bool oplus_voocphy_get_chg_pmid2out(void);
+void oplus_voocphy_set_slave_chg_pmid2out(bool enable);
+bool oplus_voocphy_get_slave_chg_pmid2out(void);
 void oplus_voocphy_reset_slave_cp(struct oplus_voocphy_manager *chip);
 bool oplus_voocphy_get_dual_cp_support(void);
 bool oplus_voocphy_get_real_fastchg_allow(void);
@@ -956,7 +965,7 @@ void oplus_voocphy_set_detach_unexpectly(bool val);
 int oplus_voocphy_enter_ship_mode(void);
 int oplus_voocphy_adjust_current_by_cool_down(int val);
 bool oplus_voocphy_get_btb_temp_over(void);
-
+int oplus_voocphy_upload_cp_error(int err_type);
 bool oplus_is_voocphy_charging(void);
 void oplus_voocphy_set_bcc_current(int val);
 int oplus_voocphy_get_bcc_max_curr(void);
@@ -969,5 +978,6 @@ int oplus_voocphy_get_batt_curve_current(void);
 void oplus_adsp_voocphy_force_svooc(int enable);
 int oplus_get_adsp_voocphy_enable(void);
 int oplus_voocphy_get_last_fast_chg_type(void);
+int oplus_voocphy_chg_out_check_event_handle(unsigned long data);
 void oplus_voocphy_clear_last_fast_chg_type(void);
 #endif /* _OPLUS_VOOCPHY_H_ */

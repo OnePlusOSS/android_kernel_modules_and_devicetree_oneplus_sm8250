@@ -471,6 +471,13 @@ static int q6lsm_apr_send_pkt(struct lsm_client *client, void *handle,
 		return -EINVAL;
 	}
 
+#ifdef OPLUS_ARCH_EXTENDS
+	/* Apply CR#3538938 to address use after free for mmap handle */
+	if (mmap_handle_p) {
+		pr_debug("%s: Invalid mmap_handle\n", __func__);
+		return -EINVAL;
+	}
+#endif /*OPLUS_ARCH_EXTENDS*/
 	pr_debug("%s: enter wait %d\n", __func__, wait);
 	if (wait)
 		mutex_lock(&lsm_common.apr_lock);
@@ -517,6 +524,10 @@ static int q6lsm_apr_send_pkt(struct lsm_client *client, void *handle,
 
 	if (mmap_p && *mmap_p == 0)
 		ret = -ENOMEM;
+#ifdef OPLUS_ARCH_EXTENDS
+	/* Apply CR#3538938 to address use after free for mmap handle */
+	mmap_handle_p = NULL;
+#endif /*OPLUS_ARCH_EXTENDS*/
 	pr_debug("%s: leave ret %d\n", __func__, ret);
 	return ret;
 }
@@ -2040,7 +2051,13 @@ static int q6lsm_mmapcallback(struct apr_client_data *data, void *priv)
 	case LSM_SESSION_CMDRSP_SHARED_MEM_MAP_REGIONS:
 		if (atomic_read(&client->cmd_state) == CMD_STATE_WAIT_RESP) {
 			spin_lock_irqsave(&mmap_lock, flags);
+#ifndef OPLUS_ARCH_EXTENDS
 			*mmap_handle_p = command;
+#else
+			/* Apply CR#3538938 to address use after free for mmap handle */
+			if (mmap_handle_p)
+				*mmap_handle_p = command;
+#endif /*OPLUS_ARCH_EXTENDS*/
 			/* spin_unlock_irqrestore implies barrier */
 			spin_unlock_irqrestore(&mmap_lock, flags);
 			atomic_set(&client->cmd_state, CMD_STATE_CLEARED);

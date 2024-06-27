@@ -22,7 +22,9 @@
 #include <net/inet_connection_sock.h>
 #include <linux/ipv6.h>
 #include <net/ipv6.h>
+#ifdef TRACE_FUNC_ON
 #include <trace/hooks/ipv4.h>
+#endif
 #include <trace/events/net.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
@@ -353,13 +355,13 @@ static void oplus_game_first_udp_recvmsg(void *data, struct sock *sk)
 }
 #endif
 
-static int init_oplus_game_first_ctl()
+static int init_oplus_game_first_ctl(void)
 {
 	oplus_game_first_ctl_header = register_net_sysctl(&init_net, "net/oplus_game_first", oplus_game_first_sysctl_table);
 	return oplus_game_first_ctl_header == NULL ? -ENOMEM : 0;
 }
 
-static void deinit_oplus_game_first_ctl()
+static void deinit_oplus_game_first_ctl(void)
 {
 	if(oplus_game_first_ctl_header) {
 		unregister_net_sysctl_table(oplus_game_first_ctl_header);
