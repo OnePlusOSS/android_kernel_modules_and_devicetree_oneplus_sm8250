@@ -112,7 +112,8 @@ enum oplus_chg_track_info_flag {
 	TRACK_NOTIFY_FLAG_FASTCHG_START_ABNORMAL,
 	TRACK_NOTIFY_FLAG_DUAL_CHAN_ABNORMAL,
 	TRACK_NOTIFY_FLAG_DUMMY_START_ABNORMAL,
-	TRACK_NOTIFY_FLAG_SOFTWARE_ABNORMAL_LAST = TRACK_NOTIFY_FLAG_DUMMY_START_ABNORMAL,
+	TRACK_NOTIFY_FLAG_WIRED_ONLINE_ERROR,
+	TRACK_NOTIFY_FLAG_SOFTWARE_ABNORMAL_LAST = TRACK_NOTIFY_FLAG_WIRED_ONLINE_ERROR,
 
 	TRACK_NOTIFY_FLAG_MAX_CNT,
 
@@ -160,5 +161,6 @@ int oplus_chg_track_time_zone_get(char *buf);
 struct dentry *oplus_chg_track_get_debugfs_root(void);
 int oplus_chg_track_set_hidl_info(const char *buf, size_t count);
 int oplus_chg_track_check_wls_charging_break(int wls_connect);
+void oplus_chg_track_upload_wired_online_err_info(struct oplus_monitor *monitor);
 
 #endif /* __OPLUS_CHG_TRACK_H__ */

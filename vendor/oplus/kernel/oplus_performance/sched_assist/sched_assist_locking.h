@@ -29,4 +29,6 @@ void enqueue_locking_entity(struct cfs_rq *cfs_rq, struct sched_entity *se);
 void dequeue_locking_entity(struct cfs_rq *cfs_rq, struct sched_entity *se);
 void check_locking_protect_tick(struct sched_entity *curr);
 bool check_locking_protect_wakeup(struct task_struct *curr, struct task_struct *p);
+
+bool test_task_is_rt(struct task_struct *p);
 #endif /* _OPLUS_LOCKING_ASSIST_H_  */

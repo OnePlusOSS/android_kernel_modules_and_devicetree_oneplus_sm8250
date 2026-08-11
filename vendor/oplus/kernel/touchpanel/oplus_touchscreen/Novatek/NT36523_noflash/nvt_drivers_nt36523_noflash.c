@@ -2577,7 +2577,7 @@ static int __maybe_unused nvt_set_smooth_para(struct chip_data_nt36523 *chip_inf
 
 	ret = nvt_extend_cmd2_store(chip_info, EVENTBUFFER_EXT_CMD, EVENTBUFFER_EXT_SMOOTH_LEVEL, level);
 
-    return ret;
+	return ret;
 }
 
 static int nvt_enable_pen_mode(struct chip_data_nt36523 *chip_info, bool enable)
@@ -6565,6 +6565,46 @@ static void nova_init_oplus_apk_op(struct touchpanel_data *ts)
 #endif // end of CONFIG_OPLUS_TP_APK
 
 
+static void nvt_prase_dts(struct device *dev, void *chip_data)
+{
+	int rc;
+	int i;
+	int length;
+	struct device_node *np;
+
+	struct chip_data_nt36523 *chip_info = (struct chip_data_nt36523 *)chip_data;
+	np = dev->of_node;
+
+	rc = of_property_count_u32_elems(np, "touchpanel,pen-id-map");
+	if (rc < 0) {
+		TPD_INFO("chip_info->pen_id_map not specified\n");
+		rc = 0;
+	}
+	length = rc;
+	chip_info->pen_id_map_num = 0;
+
+	if (length != 0 && length % 2 == 0) {
+		chip_info->pen_id_map_num = length / 2;
+		chip_info->pen_id_map_array = devm_kzalloc(dev, chip_info->pen_id_map_num * sizeof(struct pen_id_map), GFP_KERNEL);
+
+		if (chip_info->pen_id_map_array) {
+			rc = of_property_read_u32_array(np, "touchpanel,pen-id-map", (uint32_t *)chip_info->pen_id_map_array, length);
+			if (rc < 0) {
+				TPD_INFO("parse touchpanel,pen-id-map failed, rc=%d\n", rc);
+				devm_kfree(dev, chip_info->pen_id_map_array);
+				chip_info->pen_id_map_num = 0;
+			} else {
+				TPD_INFO("pen_id_map num = %d\n", chip_info->pen_id_map_num);
+				for (i = 0; i < chip_info->pen_id_map_num; i++) {
+					TPD_INFO("src_id: %d , dst_id: %d\n", chip_info->pen_id_map_array[i].src_id, chip_info->pen_id_map_array[i].dst_id);
+				}
+			}
+		}
+	} else {
+		TPD_INFO("pen_id_map elements should be multiple of 2. length = d%\n", length);
+	}
+}
+
 /*********** Start of SPI Driver and Implementation of it's callbacks*************************/
 static int nvt_tp_probe(struct spi_device *client)
 {
@@ -6676,19 +6716,21 @@ static int nvt_tp_probe(struct spi_device *client)
         goto err_register_driver;
     }
 
-    ts->tp_suspend_order = TP_LCD_SUSPEND;
-    ts->tp_resume_order = LCD_TP_RESUME;
-    chip_info->is_sleep_writed = false;
-    chip_info->fw_name = ts->panel_data.fw_name;
-    chip_info->dev = ts->dev;
-    chip_info->test_limit_name = ts->panel_data.test_limit_name;
+	ts->tp_suspend_order = TP_LCD_SUSPEND;
+	ts->tp_resume_order = LCD_TP_RESUME;
+	chip_info->is_sleep_writed = false;
+	chip_info->fw_name = ts->panel_data.fw_name;
+	chip_info->dev = ts->dev;
+	chip_info->test_limit_name = ts->panel_data.test_limit_name;
 
-    //reset esd handle time interval
-    if (ts->esd_handle_support) {
-        chip_info->esd_check_enabled = false;
-        ts->esd_info.esd_work_time = msecs_to_jiffies(NVT_TOUCH_ESD_CHECK_PERIOD); // change esd check interval to 1.5s
-        TPD_INFO("%s:change esd handle time to %d s\n", __func__, ts->esd_info.esd_work_time / HZ);
-    }
+	nvt_prase_dts(ts->dev, chip_info);
+
+	//reset esd handle time interval
+	if (ts->esd_handle_support) {
+		chip_info->esd_check_enabled = false;
+		ts->esd_info.esd_work_time = msecs_to_jiffies(NVT_TOUCH_ESD_CHECK_PERIOD); // change esd check interval to 1.5s
+		TPD_INFO("%s:change esd handle time to %d s\n", __func__, ts->esd_info.esd_work_time / HZ);
+	}
 
     /*6. create nvt test files*/
     nvt_flash_proc_init(ts, "NVTSPI");

@@ -1139,10 +1139,10 @@ static void oplus_adsp_voocphy_status_func(struct work_struct *work)
 	}
 
 	oplus_adsp_voocphy_fastchg_event_handle(intval);
-	if ((intval & 0xFF) == ADSP_VPHY_FAST_NOTIFY_PRESENT
+/*	if ((intval & 0xFF) == ADSP_VPHY_FAST_NOTIFY_PRESENT
 		|| (intval & 0xFF) == ADSP_VPHY_FAST_NOTIFY_ONGOING) {
 		oplus_chg_set_curr_level_to_voocphy(bcdev);
-	}
+	}*/
 
 	if ((intval & 0xFF) != ADSP_VPHY_FAST_NOTIFY_PRESENT)
 		oplus_adsp_voocphy_cancle_err_check(bcdev);
@@ -7848,6 +7848,58 @@ err:
 	return -EINVAL;
 }
 
+static int batt_info_read_buffer(struct battery_chg_dev *bcdev)
+{
+	int index = 0;
+	int rc = 0;
+
+	if (!bcdev || !bcdev->ap_read_buffer_dump)
+		return -ENODEV;
+
+	mutex_lock(&bcdev->ap_read_buffer_lock);
+	rc = ap_set_message_id(bcdev, AP_MESSAGE_GET_GAUGE_BATTINFO);
+	if (rc)
+		goto err;
+
+	reinit_completion(&bcdev->ap_read_ack[AP_MESSAGE_GET_GAUGE_BATTINFO]);
+	rc = wait_for_completion_timeout(&bcdev->ap_read_ack[AP_MESSAGE_GET_GAUGE_BATTINFO],
+					 msecs_to_jiffies(AP_READ_WAIT_TIME_MS));
+	if (!rc) {
+		chg_err("Error, timed out sending message\n");
+		goto err;
+	}
+
+	memcpy(&bcdev->battinfo, bcdev->ap_read_buffer_dump->data_buffer,
+			sizeof(struct battery_manufacture_info));
+	memset(bcdev->ap_read_buffer_dump, 0, sizeof(*bcdev->ap_read_buffer_dump));
+	mutex_unlock(&bcdev->ap_read_buffer_lock);
+	return index;
+err:
+	memset(bcdev->ap_read_buffer_dump, 0, sizeof(*bcdev->ap_read_buffer_dump));
+	mutex_unlock(&bcdev->ap_read_buffer_lock);
+	return -EINVAL;
+}
+
+static int oplus_get_battinfo_sn(struct oplus_chg_ic_dev *ic_dev, char buf[], int len)
+{
+	struct battery_chg_dev *bcdev;
+	int bsnlen = 0;
+
+	if (ic_dev == NULL) {
+		chg_err("oplus_chg_ic_dev is NULL");
+		return -ENODEV;
+	}
+	bcdev = oplus_chg_ic_get_drvdata(ic_dev);
+
+	if (!bcdev || !buf || len < OPLUS_BATT_SERIAL_NUM_SIZE)
+		return -EINVAL;
+
+	chg_info("BattSN:%s", bcdev->battinfo.batt_serial_num);
+	bsnlen = strlcpy(buf, bcdev->battinfo.batt_serial_num, OPLUS_BATT_SERIAL_NUM_SIZE);
+
+	return bsnlen;
+}
+
 static void *oplus_chg_8350_gauge_get_func(struct oplus_chg_ic_dev *ic_dev,
 					   enum oplus_chg_ic_func func_id)
 {
@@ -8016,6 +8068,10 @@ static void *oplus_chg_8350_gauge_get_func(struct oplus_chg_ic_dev *ic_dev,
 	case OPLUS_IC_FUNC_GAUGE_GET_CALIB_TIME:
 		func = OPLUS_CHG_IC_FUNC_CHECK(OPLUS_IC_FUNC_GAUGE_GET_CALIB_TIME,
 					      oplus_sm8350_get_calib_time);
+		break;
+	case OPLUS_IC_FUNC_GAUGE_GET_BATT_SN:
+		func = OPLUS_CHG_IC_FUNC_CHECK(OPLUS_IC_FUNC_GAUGE_GET_BATT_SN,
+					       oplus_get_battinfo_sn);
 		break;
 	default:
 		chg_err("this func(=%d) is not supported\n", func_id);
@@ -9428,6 +9484,8 @@ static int battery_chg_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&bcdev->get_regmap_work, oplus_adsp_get_regmap_work);
 	schedule_delayed_work(&bcdev->get_regmap_work, 0);
 	mod_delayed_work(system_highpri_wq, &bcdev->ctrl_lcm_frequency, 0);
+
+	batt_info_read_buffer(bcdev);
 
 	chg_info("battery_chg_probe end...\n");
 #endif

@@ -610,6 +610,9 @@
 		touchpanel,pen-panel-coords = <3200 5120>;
 		touchpanel,pen-max-pressure = <4096>;
 		touchpanel,pen-max-tilt = <60 60>;
+		touchpanel,pen-id-map = <3 2
+					4 2
+					5 2>;
 		touchpanel,msecs-to-jiffies-time = <100>;
 		tp_type = <3>;
 		platform_support_project = <21027>;
@@ -1806,6 +1809,8 @@
 			qcom,default_little_cool_vfloat_sw_limit = <4385>;
 			qcom,default_temp_little_cool_vfloat_mv = <4435>;
 			qcom,default_little_cool_vfloat_over_sw_limit = <4445>;
+
+			oplus_spec,dec-vol-fv-mv = <40>;
 
 			///qcom,offset_temp = <30>;
 			//for control:

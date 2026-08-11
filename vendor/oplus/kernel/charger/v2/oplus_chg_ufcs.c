@@ -3088,6 +3088,9 @@ static void oplus_ufcs_current_work(struct work_struct *work)
 		curr_set = chip->target_curr_ma;
 	}
 
+	if (curr_set > chip->target_curr_ma)
+		curr_set = chip->target_curr_ma;
+
 	chg_err("curr_set=%d, curr_set_ma=%d, target_curr_ma=%d\n", curr_set, chip->curr_set_ma, chip->target_curr_ma);
 
 	if ((target_vbus != chip->vol_set_mv) || (curr_set != chip->curr_set_ma)) {

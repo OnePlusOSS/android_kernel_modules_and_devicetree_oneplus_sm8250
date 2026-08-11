@@ -1480,8 +1480,7 @@ static void ufs_qcom_set_caps(struct ufs_hba *hba)
 	hba->caps |= UFSHCD_CAP_AUTO_BKOPS_SUSPEND;
 
 	if (host->hw_ver.major >= 0x2) {
-		/* remove the power off/on during H8, avoid 7250 core hang issue
-		   add by yanghao@PSW.Kernel.Stability 2020-8-25 */
+		/* remove the power off/on during H8, avoid 7250 core hang issue */
 		#ifndef OPLUS_BUG_STABILITY
 		if (!host->disable_lpm)
 			hba->caps |= UFSHCD_CAP_POWER_COLLAPSE_DURING_HIBERN8;

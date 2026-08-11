@@ -1035,6 +1035,13 @@ typedef enum {
 #define AGING2_FFC1_DUAL_LT60W_OFFSET_MV	15
 #define AGING2_FFC2_DUAL_LT60W_OFFSET_MV	15
 
+struct dec_cv_data {
+	bool dec_track;
+	int dec_vol;
+	int dec_delta;
+	int spec_dec_cv_mv;
+};
+
 struct oplus_chg_chip {
 	struct i2c_client *client;
 	struct device *dev;
@@ -1429,12 +1436,16 @@ struct oplus_chg_chip {
 	oplus_chg_track_trigger *mmi_chg_info_trigger;
 	oplus_chg_track_trigger *slow_chg_info_trigger;
 	oplus_chg_track_trigger *chg_cycle_info_trigger;
+	oplus_chg_track_trigger *dec_vol_info_trigger;
 	struct delayed_work mmi_chg_info_trigger_work;
 	struct delayed_work slow_chg_info_trigger_work;
 	struct delayed_work chg_cycle_info_trigger_work;
+	struct delayed_work dec_vol_info_trigger_work;
+
 	struct mutex mmi_chg_info_lock;
 	struct mutex slow_chg_info_lock;
 	struct mutex chg_cycle_info_lock;
+	struct mutex dec_vol_info_lock;
 
 	struct reserve_soc_data rsd;
 	bool is_gauge_ready;
@@ -1518,6 +1529,8 @@ struct oplus_chg_chip {
 	bool use_audio_switch;
 	int soc_resume_sleep_time;
 	int track_gmtoff;
+	struct dec_cv_data dec_cv;
+	bool dec_spec_support;
 };
 
 #define TTF_UPDATE_UEVENT_BIT		BIT(30)
@@ -1909,5 +1922,7 @@ void oplus_test_kit_unregister(void);
 int oplus_get_slow_chg_current(int batt_curve_current);
 int oplus_chg_track_upload_slow_chg_info(struct oplus_chg_chip *chip, int pct, int watt, int en);
 int oplus_chg_track_upload_mmi_chg_info(struct oplus_chg_chip *chip, int mmi_chg);
+void oplus_charger_set_dec_delta(int val);
+int oplus_charger_get_dec_delta(void);
 //#endif
 #endif /*_OPLUS_CHARGER_H_*/

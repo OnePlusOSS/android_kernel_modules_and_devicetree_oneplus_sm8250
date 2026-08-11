@@ -758,6 +758,26 @@ static void zy0602_cal_model_check(bool ffc_state)
 	bq27541_track_upload_mode_info(chip);
 }
 
+static void sub_zy0602_cal_model_check(bool ffc_state)
+{
+	struct chip_bq27541 *chip = sub_gauge_ic;
+	int ret;
+
+	if (!chip || chip->device_type != DEVICE_ZY0602)
+		return;
+
+	pr_info("zy0602_cal_model_check,ffc:%d\n", ffc_state);
+
+	if (ffc_state == false)
+		fg_gauge_calibrate_board(chip);
+	ret = fg_gauge_check_cell_model(chip, DTSI_MODEL_NAME);
+	if (ret > 0)
+		ret = fg_gauge_restore_cell_model(chip, DTSI_MODEL_NAME);
+	fg_gauge_check_por_soc(chip);
+
+	bq27541_track_upload_mode_info(chip);
+}
+
 /* OPLUS 2021-06-20 Add begin for zy0603 bad battery. */
 static int zy0603_start_checksum_cal(struct chip_bq27541 *chip)
 {
@@ -1487,7 +1507,7 @@ static int bq27541_get_battery_cc(void) /*  sjc20150105  */
 		ret = bq27541_read_i2c(gauge_ic, gauge_ic->cmd_addr.reg_cc, &cc);
 		if (ret) {
 			dev_err(gauge_ic->dev, "error reading cc.\n");
-			return ret;
+			return 0;
 		}
 	} else {
 		if (gauge_ic->cc_pre) {
@@ -1515,7 +1535,7 @@ static int bq27541_get_sub_battery_cc(void)
 		ret = bq27541_read_i2c(sub_gauge_ic, sub_gauge_ic->cmd_addr.reg_cc, &cc);
 		if (ret) {
 			dev_err(sub_gauge_ic->dev, "error reading cc.\n");
-			return ret;
+			return 0;
 		}
 	} else {
 		if (sub_gauge_ic->cc_pre) {
@@ -2787,7 +2807,7 @@ static int bq27541_get_battery_soh(void) /*  sjc20150105  */
 
 		if (ret || (ret_q < 0)) {
 			dev_err(gauge_ic->dev, "error reading soh.\n");
-			return ret;
+			return 0;
 		}
 		sh366002_read_gaugeinfo_block(gauge_ic);
 	} else {
@@ -2827,7 +2847,7 @@ static int bq27541_get_sub_battery_soh(void)
 
 		if (ret || (ret_q < 0)) {
 			dev_err(sub_gauge_ic->dev, "error reading soh.\n");
-			return ret;
+			return 0;
 		}
 		sh366002_read_gaugeinfo_block(sub_gauge_ic);
 	} else {
@@ -3936,6 +3956,7 @@ static struct oplus_gauge_operations bq27541_sub_gauge_ops = {
 	.get_prev_batt_remaining_capacity = bq27541_get_sub_gauge_prev_batt_remaining_capacity,
 	.get_battery_authenticate = bq27541_get_sub_battery_authenticate,
 	.update_soc_smooth_parameter = bq28z610_update_sub_soc_smooth_parameter,
+	.cal_model_check = sub_zy0602_cal_model_check,
 	/*	.get_battery_hmac = bq27541_get_battery_hmac,
 	.set_battery_full = bq27541_set_battery_full,
 	.get_gauge_i2c_err = bq27541_get_gauge_i2c_err,
@@ -6120,8 +6141,10 @@ static void bq27541_reset(struct i2c_client *client_chip)
 	atomic_set(&bq27541_chip->shutdown, 1);
 	gauge_chip = bq27541_chip->oplus_gauge;
 
-	if (bq27541_chip->track_mode.mode_check_buf)
+	if (bq27541_chip->track_mode.mode_check_buf) {
 		kfree(bq27541_chip->track_mode.mode_check_buf);
+		bq27541_chip->track_mode.mode_check_buf = NULL;
+	}
 
 	if (bq27541_chip->batt_zy0603) {
 		return;

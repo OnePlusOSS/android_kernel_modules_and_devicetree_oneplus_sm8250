@@ -25,6 +25,7 @@ enum wired_topic_item {
 	WIRED_TIME_TYPEC_STATE,
 	WIRED_ITEM_REAL_CHG_TYPE,
 	WIRED_ITEM_VBUS,
+	WIRED_ITEM_ONLINE_STATUS_ERR,
 };
 
 enum oplus_wired_cc_detect_status {

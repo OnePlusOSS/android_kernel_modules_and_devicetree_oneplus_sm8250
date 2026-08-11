@@ -1613,7 +1613,7 @@ static int bq27541_get_battery_cc(struct chip_bq27541 *chip) /*  sjc20150105  */
 		ret = bq27541_read_i2c(chip, chip->cmd_addr.reg_cc, &cc);
 		if (ret) {
 			dev_err(chip->dev, "error reading cc.\n");
-			return ret;
+			return 0;
 		}
 	} else {
 		if (chip->cc_pre) {
@@ -1677,7 +1677,7 @@ static int bq27541_get_battery_soh(struct chip_bq27541 *chip) /*  sjc20150105  *
 		ret = bq27541_read_i2c(chip, chip->cmd_addr.reg_soh, &soh);
 		if (ret) {
 			dev_err(chip->dev, "error reading fcc.\n");
-			return ret;
+			return 0;
 		}
 	} else {
 		if (chip->soh_pre) {
@@ -7046,6 +7046,117 @@ static void bq27541_check_iic_recover(struct work_struct *work)
 	}
 }
 
+static int oplus_bq27541_get_batt_sn(struct chip_bq27541 *chip)
+{
+	int i;
+	int ret;
+	int retry = 0;
+	u8 check_sum = 0xFF;
+	u8 buf[BQ28Z610_BATT_SN_READ_BUF_LEN] = {0x00};
+	u8 buf_zy0602[ZY0602_BATT_SN_READ_BUF_LEN] = {0x00};
+	u8 batt_sn[OPLUS_BATT_SERIAL_NUM_SIZE] = {0x00};
+
+	if (!chip) {
+		chg_err("chip fg_ic is not ready.");
+		return -ENODEV;
+	}
+	if (atomic_read(&chip->suspended) == 1) {
+		return 0;
+	}
+
+RETRY:
+	while (retry < BQ28Z610_BATT_SN_RETRY_MAX) {
+		retry++;
+		if (chip->batt_zy0603 || chip->batt_bq28z610) {
+			mutex_lock(&chip->bq28z610_alt_manufacturer_access);
+			ret = bq27541_i2c_txsubcmd(chip, BQ28Z610_BATT_SN_EN_ADDR, BQ28Z610_BATT_SN_CMD);
+			if (ret < 0) {
+				mutex_unlock(&chip->bq28z610_alt_manufacturer_access);
+				continue;
+			}
+			usleep_range(1000, 1000);
+			ret = bq27541_read_i2c_block(chip, BQ28Z610_BATT_SN_EN_ADDR,
+						    BQ28Z610_BATT_SN_READ_BUF_LEN, buf);
+			mutex_unlock(&chip->bq28z610_alt_manufacturer_access);
+			if (ret < 0)
+				continue;
+
+			if ((buf[0] == (BQ28Z610_BATT_SN_CMD & 0xFF))
+			    && (buf[1] == (BQ28Z610_BATT_SN_CMD >> 8))) {
+				memcpy(batt_sn, &buf[2], OPLUS_BATT_SERIAL_NUM_SIZE);
+				break;
+			}
+		} else if (chip->device_type == DEVICE_ZY0602) {
+			mutex_lock(&chip->bq28z610_alt_manufacturer_access);
+			ret = bq27541_i2c_txsubcmd_onebyte(chip, BQ27411_BLOCK_DATA_CONTROL, 0x01);
+			if (ret < 0) {
+				mutex_unlock(&chip->bq28z610_alt_manufacturer_access);
+				continue;
+			}
+			usleep_range(5000, 5000);
+			ret = bq27541_i2c_txsubcmd_onebyte(chip, ZY0602_BATT_SN_EN_ADDR, 0x02);
+			if (ret < 0) {
+				mutex_unlock(&chip->bq28z610_alt_manufacturer_access);
+				continue;
+			}
+			usleep_range(10000, 10000);
+
+			ret = bq27541_read_i2c_block(chip, ZY0602_BATT_SN_READ_ADDR,
+							ZY0602_BATT_SN_READ_BUF_LEN, buf_zy0602);
+			mutex_unlock(&chip->bq28z610_alt_manufacturer_access);
+			if (ret < 0)
+				continue;
+			memcpy(batt_sn, &buf_zy0602[8], OPLUS_BATT_SERIAL_NUM_SIZE);
+			break;
+		} else {
+			/* TODO other gauge.*/
+			retry = BQ28Z610_BATT_SN_RETRY_MAX;
+		}
+		chg_err("read sn fail, retry(%d)", retry);
+	}
+
+	if (retry < BQ28Z610_BATT_SN_RETRY_MAX) {
+		if (batt_sn[OPLUS_BATT_SERIAL_NUM_SIZE - 1] != BQ28Z610_BATT_SN_NO_CHECKSUM) {
+			check_sum = 0xFF;
+			for (i = 0; i < OPLUS_BATT_SERIAL_NUM_SIZE - 1; i++) {
+				check_sum -= batt_sn[i];
+			}
+			if (check_sum != batt_sn[OPLUS_BATT_SERIAL_NUM_SIZE - 1]) {
+				chg_err("check_sum fail calc[%d] read[%d], retry.",
+					check_sum, batt_sn[OPLUS_BATT_SERIAL_NUM_SIZE - 1]);
+				goto RETRY;
+			}
+		}
+		/* replace checksum byte by end of string '\0' */
+		batt_sn[OPLUS_BATT_SERIAL_NUM_SIZE - 1] = '\0';
+		strlcpy(chip->battinfo.batt_serial_num, (char*)batt_sn, OPLUS_BATT_SERIAL_NUM_SIZE);
+	} else {
+		chg_err("get sn failed");
+	}
+
+	return 0;
+}
+
+static int oplus_bq27541_get_battinfo_sn(struct oplus_chg_ic_dev *ic_dev, char buf[], int len)
+{
+	struct chip_bq27541 *chip;
+	int bsnlen = 0;
+
+	if (ic_dev == NULL) {
+		chg_err("oplus_chg_ic_dev is NULL");
+		return -ENODEV;
+	}
+	chip = oplus_chg_ic_get_drvdata(ic_dev);
+
+	if (!chip || !buf || len < OPLUS_BATT_SERIAL_NUM_SIZE)
+		return -EINVAL;
+
+	chg_info("BattSN(%s):%s", ic_dev->name, chip->battinfo.batt_serial_num);
+	bsnlen = strlcpy(buf, chip->battinfo.batt_serial_num, OPLUS_BATT_SERIAL_NUM_SIZE);
+
+	return bsnlen;
+}
+
 static void *oplus_chg_get_func(struct oplus_chg_ic_dev *ic_dev,
 				enum oplus_chg_ic_func func_id)
 {
@@ -7309,6 +7420,10 @@ static void *oplus_chg_get_func(struct oplus_chg_ic_dev *ic_dev,
 		func = OPLUS_CHG_IC_FUNC_CHECK(OPLUS_IC_FUNC_GAUGE_GET_CALIB_TIME,
 					      oplus_bq27541_get_calib_time);
 		break;
+	case OPLUS_IC_FUNC_GAUGE_GET_BATT_SN:
+		func = OPLUS_CHG_IC_FUNC_CHECK(OPLUS_IC_FUNC_GAUGE_GET_BATT_SN,
+					      oplus_bq27541_get_battinfo_sn);
+		break;
 	default:
 		chg_err("this func(=%d) is not supported\n", func_id);
 		func = NULL;
@@ -7427,6 +7542,8 @@ rerun:
 		pr_err("kzalloc() authenticate_data failed.\n");
 		return -ENOMEM;
 	}
+
+	oplus_bq27541_get_batt_sn(fg_ic);
 
 	atomic_set(&fg_ic->locked, 0);
 	rc = of_property_read_u32(fg_ic->dev->of_node, "oplus,ic_type",

@@ -2323,7 +2323,7 @@
 
 			qcom,support_abnormal_adapter;
 
-			oplus,aging_ffc_version = <1>;
+			oplus_spec,dec-vol-fv-mv = <40>;
 
 			//for PD9V or QC9V
 			qcom,vbatt_pdqc_to_5v_thr = <4100>;

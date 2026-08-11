@@ -35,6 +35,9 @@
 
 #include "../charger_ic/op_charge.h"
 
+#define ONLINE_STATUS_ERR_CHECK_DELAY_MS	1000
+#define ONLINE_STATUS_ERR_CHECK_MAX		5
+
 enum oplus_usbtemp_timer_stage {
 	OPLUS_USBTEMP_TIMER_STAGE0 = 0,
 	OPLUS_USBTEMP_TIMER_STAGE1,
@@ -77,6 +80,13 @@ struct oplus_usbtemp_spec_config {
 	int usbtemp_max_temp_thr;
 	int usbtemp_temp_up_time_thr;
 	int usbtemp_otg_cc_boot_current_limit;
+};
+
+struct oplus_mms_wired_abnormal_monitor {
+	unsigned int err_code;
+	int online_status_err_count;
+
+	struct delayed_work online_status_err_work;
 };
 
 struct oplus_mms_wired {
@@ -132,6 +142,7 @@ struct oplus_mms_wired {
 	struct alarm usbtemp_alarm_timer;
 	struct work_struct usbtemp_restart_work;
 	struct oplus_usbtemp_spec_config usbtemp_spec;
+	struct oplus_mms_wired_abnormal_monitor wam;
 
 	int vbat_mv;
 	int batt_temp;
@@ -3566,6 +3577,50 @@ static void oplus_mms_wired_bcc_parms_reset(struct oplus_mms_wired *chip)
 	chip->bcc_curr_done = BCC_CURR_DONE_UNKNOW;
 }
 
+static void oplus_mms_wired_online_status_err_work(struct work_struct *work)
+{
+	struct delayed_work *dwork = to_delayed_work(work);
+	struct oplus_mms_wired *chip =
+		container_of(dwork, struct oplus_mms_wired, wam.online_status_err_work);
+	struct oplus_mms_wired_abnormal_monitor *wam = &chip->wam;
+	struct mms_msg *msg;
+	bool present;
+	int hw_detect;
+	int rc;
+	bool report = false;
+
+	present = oplus_wired_is_present();
+	hw_detect = oplus_wired_get_hw_detect();
+	if (chip->wired_online == present) {
+		wam->online_status_err_count = 0;
+		return;
+	}
+
+	if (wam->online_status_err_count >= ONLINE_STATUS_ERR_CHECK_MAX)
+		report = true;
+	if (report) {
+		chg_err("report wired online status error, wired_online=%d, vooc_online=%d, vooc_online_keep=%d\r\n",
+			chip->wired_online, chip->vooc_online, chip->vooc_online_keep);
+		msg = oplus_mms_alloc_int_msg(MSG_TYPE_ITEM, MSG_PRIO_MEDIUM,
+					      WIRED_ITEM_ONLINE_STATUS_ERR, 1);
+		if (msg == NULL) {
+			chg_err("alloc msg error\n");
+		} else {
+			rc = oplus_mms_publish_msg(chip->wired_topic, msg);
+			if (rc < 0) {
+				chg_err("publish online status err msg error, rc=%d\n", rc);
+				kfree(msg);
+			}
+		}
+		wam->online_status_err_count = 0;
+		return;
+	}
+
+	wam->online_status_err_count++;
+	schedule_delayed_work(&wam->online_status_err_work,
+		msecs_to_jiffies(ONLINE_STATUS_ERR_CHECK_DELAY_MS));
+}
+
 static void oplus_mms_wired_plugin_handler_work(struct work_struct *work)
 {
 	struct oplus_mms_wired *chip =
@@ -3587,9 +3642,9 @@ static void oplus_mms_wired_plugin_handler_work(struct work_struct *work)
 	if (chip->vooc_topic) {
 		oplus_mms_get_item_data(chip->vooc_topic, VOOC_ITEM_ONLINE_KEEP,
 					&data, false);
-		chip->vooc_online = data.intval;
+		chip->vooc_online_keep = data.intval;
 	} else {
-		chip->vooc_online = false;
+		chip->vooc_online_keep = false;
 	}
 
 	present = oplus_wired_is_present();
@@ -3620,9 +3675,16 @@ static void oplus_mms_wired_plugin_handler_work(struct work_struct *work)
 	oplus_mms_wired_bcc_parms_reset(chip);
 
 skip_present:
-	online = present || chip->vooc_online;
-	chg_info("present=%d, vooc_online=%d, pre_online=%d", present,
-		 chip->vooc_online, chip->wired_online);
+	online = present || chip->vooc_online_keep;
+	chg_info("present=%d, vooc_online_keep=%d, pre_online=%d", present,
+		 chip->vooc_online_keep, chip->wired_online);
+	if (online != present) {
+		if (!(work_busy(&chip->wam.online_status_err_work.work)))
+			schedule_delayed_work(&chip->wam.online_status_err_work, 0);
+	} else {
+		cancel_delayed_work_sync(&chip->wam.online_status_err_work);
+		chip->wam.online_status_err_count = 0;
+	}
 	if (chip->wired_online == online) {
 		chip->usbtemp_curr_status = 0;
 		/*
@@ -4814,6 +4876,16 @@ static struct mms_item oplus_mms_wired_item[] = {
 			.update = oplus_mms_wired_vbus,
 		}
 	},
+	{
+		.desc = {
+			.item_id = WIRED_ITEM_ONLINE_STATUS_ERR,
+			.str_data = false,
+			.up_thr_enable = false,
+			.down_thr_enable = false,
+			.dead_thr_enable = false,
+			.update = NULL,
+		}
+	},
 };
 
 static const struct oplus_mms_desc oplus_mms_wired_desc = {
@@ -5056,6 +5128,7 @@ static int oplus_mms_wired_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&chip->typec_state_notify_work, oplus_mms_wired_typec_state_notify_work);
 	INIT_DELAYED_WORK(&chip->typec_state_change_work, oplus_mms_wired_typec_state_change_work);
 	INIT_DELAYED_WORK(&chip->svid_handler_work, oplus_mms_wired_svid_handler_work);
+	INIT_DELAYED_WORK(&chip->wam.online_status_err_work, oplus_mms_wired_online_status_err_work);
 	INIT_WORK(&chip->err_handler_work, oplus_mms_wired_err_handler_work);
 	INIT_WORK(&chip->plugin_handler_work,
 		  oplus_mms_wired_plugin_handler_work);

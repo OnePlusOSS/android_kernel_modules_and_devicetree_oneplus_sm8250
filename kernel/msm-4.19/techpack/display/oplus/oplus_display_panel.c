@@ -352,7 +352,9 @@ long panel_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		return retcode;
 	}
 
-	in_size = out_size = drv_size = PANEL_IOCTL_SIZE(cmd);
+	drv_size = PANEL_IOCTL_SIZE(cmd);
+	out_size = drv_size;
+	in_size = drv_size;
 	if ((cmd & ioctl->cmd & IOC_IN) == 0) {
 		in_size = 0;
 	}

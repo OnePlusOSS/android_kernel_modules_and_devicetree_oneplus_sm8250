@@ -87,6 +87,7 @@ struct vphy_chip {
 	bool led_on;
 	bool is_pd_svooc_adapter;
 	bool is_abnormal_pd_svooc_adapter;
+	int adapter_sid;
 	bool is_wired_present;
 	int cool_down;
 	int fastchg_notify_event;
@@ -94,6 +95,7 @@ struct vphy_chip {
 	bool switching_hw_status;
 	int debug_cp_err;
 	int track_err_type;
+	int cc_detect;
 };
 
 extern void oplus_chg_adc_switch_ctrl(void);
@@ -115,6 +117,7 @@ bool oplus_chglib_get_led_on(struct device *dev);
 bool oplus_chglib_get_switch_hw_status(struct device *dev);
 bool oplus_chglib_is_pd_svooc_adapter(struct device *dev);
 bool oplus_chglib_is_abnormal_pd_svooc_adapter(struct device *dev);
+int oplus_chglib_get_adapter_sid_power(struct device *dev);
 bool oplus_chglib_is_wired_present(struct device *dev);
 bool oplus_chglib_is_switch_temp_range(void);
 int oplus_chglib_get_battery_btb_temp_cal(void);
@@ -129,5 +132,7 @@ int oplus_chglib_push_break_code(struct device *dev, int code);
 struct vphy_chip *oplus_chglib_register_vphy(struct device *dev,
 					     struct hw_vphy_info *vinf);
 void oplus_chglib_creat_ic_err(struct device *dev, int type);
+int oplus_chglib_get_cc_detect(struct device *dev);
+
 
 #endif /*__OPLUS_CHGLIB_H__*/

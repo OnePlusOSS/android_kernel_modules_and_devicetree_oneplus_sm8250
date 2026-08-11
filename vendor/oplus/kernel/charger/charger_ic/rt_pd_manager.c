@@ -36,8 +36,8 @@
 #include "../oplus_charger.h"
 #include "oplus_sy6974b.h"
 #include "oplus_sy6970_reg.h"
-//#undef dev_info
-//#define dev_info dev_err
+#undef dev_info
+#define dev_info dev_err
 
 #define RT_PD_MANAGER_VERSION	"0.0.8_G"
 
@@ -540,9 +540,11 @@ static int pd_tcp_notifier_call(struct notifier_block *nb,
 					      USB_TYPE_POLLING_INTERVAL));
 			typec_set_data_role(rpmd->typec_port, TYPEC_DEVICE);
 			typec_set_pwr_role(rpmd->typec_port, TYPEC_SINK);
-			typec_set_pwr_opmode(rpmd->typec_port,
-					     noti->typec_state.rp_level -
-					     TYPEC_CC_VOLT_SNK_DFT);
+			if (((noti->typec_state.rp_level - TYPEC_CC_VOLT_SNK_DFT) >= TYPEC_PWR_MODE_USB) &&
+			    ((noti->typec_state.rp_level - TYPEC_CC_VOLT_SNK_DFT) <= TYPEC_PWR_MODE_PD))
+				typec_set_pwr_opmode(rpmd->typec_port,
+							noti->typec_state.rp_level -
+							TYPEC_CC_VOLT_SNK_DFT);
 			typec_set_vconn_role(rpmd->typec_port, TYPEC_SINK);
 		} else if ((old_state == TYPEC_ATTACHED_SNK ||
 			    old_state == TYPEC_ATTACHED_NORP_SRC ||

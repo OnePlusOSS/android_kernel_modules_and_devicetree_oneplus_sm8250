@@ -2954,6 +2954,57 @@ static int oplus_chg_vg_get_calib_time(struct oplus_chg_ic_dev *ic_dev, int *dod
 	return rc;
 }
 
+static int oplus_chg_vg_get_battinfo_sn(struct oplus_chg_ic_dev *ic_dev, char buf[], int len)
+{
+	struct oplus_virtual_gauge_ic *chip;
+	int i;
+	int rc = 0;
+#ifdef CONFIG_OPLUS_CHG_IC_DEBUG
+	struct oplus_chg_ic_overwrite_data *data;
+	const void *overwrite_buf;
+	int index;
+#endif
+
+	if (ic_dev == NULL) {
+		chg_err("oplus_chg_ic_dev is NULL");
+		return -ENODEV;
+	}
+
+#ifdef CONFIG_OPLUS_CHG_IC_DEBUG
+	data = oplus_chg_ic_get_overwrite_data(ic_dev, OPLUS_IC_FUNC_GAUGE_GET_BATT_SN);
+	if (unlikely(data != NULL)) {
+		overwrite_buf = (const void *)data->buf;
+		if (!oplus_chg_ic_debug_data_check(overwrite_buf, data->size)) {
+			chg_err("overwrite data error\n");
+			goto skip_overwrite;
+		}
+		index = oplus_chg_ic_get_item_data_size(overwrite_buf, 0);
+		rc = index >= len ? len : index;
+		memcpy(buf, oplus_chg_ic_get_item_data_addr(data->buf, 0), rc);
+		return 0;
+	}
+skip_overwrite:
+#endif
+
+	chip = oplus_chg_ic_get_drvdata(ic_dev);
+	for (i = 0; i < chip->child_num; i++) {
+		if (!func_is_support(&chip->child_list[i],
+				     OPLUS_IC_FUNC_GAUGE_GET_BATT_SN)) {
+			rc = (rc == 0) ? -ENOTSUPP : rc;
+			chg_err("child ic[%d] not support GET_BATT_SN", i);
+			continue;
+		}
+
+		rc = oplus_chg_ic_func(chip->child_list[i].ic_dev,
+				       OPLUS_IC_FUNC_GAUGE_GET_BATT_SN, buf, len);
+		if (rc < 0)
+			chg_err("child ic[%d] get battery serial number error, rc=%d\n",
+				i, rc);
+		break;
+	}
+
+	return rc;
+}
 static void *oplus_chg_vg_get_func(struct oplus_chg_ic_dev *ic_dev,
 				   enum oplus_chg_ic_func func_id)
 {
@@ -3235,6 +3286,10 @@ static void *oplus_chg_vg_get_func(struct oplus_chg_ic_dev *ic_dev,
 		func = OPLUS_CHG_IC_FUNC_CHECK(OPLUS_IC_FUNC_GAUGE_GET_CALIB_TIME,
 			oplus_chg_vg_get_calib_time);
 		break;
+	case OPLUS_IC_FUNC_GAUGE_GET_BATT_SN:
+		func = OPLUS_CHG_IC_FUNC_CHECK(OPLUS_IC_FUNC_GAUGE_GET_BATT_SN,
+			oplus_chg_vg_get_battinfo_sn);
+		break;
 	default:
 		chg_err("this func(=%d) is not supported\n", func_id);
 		func = NULL;
@@ -3245,6 +3300,7 @@ static void *oplus_chg_vg_get_func(struct oplus_chg_ic_dev *ic_dev,
 }
 
 #ifdef CONFIG_OPLUS_CHG_IC_DEBUG
+#define OPLUS_CHG_IC_DEBUG_LITTLE_STR_LEN (64)
 static ssize_t oplus_chg_vg_get_func_data(struct oplus_chg_ic_dev *ic_dev,
 					  enum oplus_chg_ic_func func_id,
 					  void *buf)
@@ -3620,6 +3676,22 @@ static ssize_t oplus_chg_vg_get_func_data(struct oplus_chg_ic_dev *ic_dev,
 		*item_data = cpu_to_le32(*item_data);
 		rc = oplus_chg_ic_debug_data_size(1);
 		break;
+	case OPLUS_IC_FUNC_GAUGE_GET_BATT_SN:
+		tmp_buf = (char *)devm_kzalloc(ic_dev->dev, OPLUS_CHG_IC_DEBUG_LITTLE_STR_LEN, GFP_KERNEL);
+		if (!tmp_buf) {
+			rc = -ENOMEM;
+			break;
+		}
+		rc = oplus_chg_vg_get_battinfo_sn(ic_dev, tmp_buf, OPLUS_CHG_IC_DEBUG_LITTLE_STR_LEN);
+		if (rc < 0) {
+			devm_kfree(ic_dev->dev, tmp_buf);
+			break;
+		}
+		len = oplus_chg_ic_debug_str_data_init(buf, rc);
+		memcpy(oplus_chg_ic_get_item_data_addr(buf, 0), tmp_buf, rc);
+		devm_kfree(ic_dev->dev, tmp_buf);
+		rc = len;
+		break;
 	default:
 		chg_err("this func(=%d) is not supported to get\n", func_id);
 		return -ENOTSUPP;
@@ -3744,6 +3816,7 @@ enum oplus_chg_ic_func oplus_chg_vg_overwrite_funcs[] = {
 	OPLUS_IC_FUNC_GAUGE_SET_DEEP_DISCHG_COUNT,
 	OPLUS_IC_FUNC_GAUGE_SET_DEEP_TERM_VOLT,
 	OPLUS_IC_FUNC_GAUGE_GET_BATTID_INFO,
+	OPLUS_IC_FUNC_GAUGE_GET_BATT_SN,
 };
 
 #endif /* CONFIG_OPLUS_CHG_IC_DEBUG */

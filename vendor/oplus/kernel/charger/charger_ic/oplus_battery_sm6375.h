@@ -188,12 +188,14 @@ enum {
 	RESTART_AICL,
 };
 
+#if !IS_ENABLED(CONFIG_OPLUS_CHG_TEST_KIT)
 enum cc_modes_type {
 	MODE_DEFAULT = 0,
-	MODE_UFP,
-	MODE_DFP,
+	MODE_SINK,
+	MODE_SRC,
 	MODE_DRP
 };
+#endif /* ! CONFIG_OPLUS_CHG_TEST_KIT */
 
 enum smb_irq_index {
 	/* CHGR */
@@ -707,6 +709,7 @@ struct smb_charger {
 	struct work_struct	dpdm_set_work;
 	struct work_struct	chargerid_switch_work;
 	struct delayed_work	keep_vbus_work;
+	struct delayed_work	parse_dt_adc_channels_work;
 	struct mutex 		pinctrl_mutex;
 
 	int			ccdetect_gpio;

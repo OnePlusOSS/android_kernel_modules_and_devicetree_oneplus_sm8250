@@ -380,4 +380,8 @@ static inline void oplus_set_ux_state_lock(struct task_struct *t, int ux_state, 
 }
 
 #endif /* IS_ENABLED(CONFIG_OPLUS_FEATURE_SCHED_UX_PRIORITY) */
+
+#if defined(CONFIG_OPLUS_FEATURE_ASYNC_BINDER_INHERIT_UX)
+int oplus_binder_sysfs_init(void);
+#endif /* defined(CONFIG_OPLUS_FEATURE_ASYNC_BINDER_INHERIT_UX) */
 #endif /* _OPLUS_SCHED_COMMON_H_ */

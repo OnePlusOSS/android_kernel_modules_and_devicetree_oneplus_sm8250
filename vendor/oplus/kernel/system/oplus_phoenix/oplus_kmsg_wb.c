@@ -62,7 +62,7 @@ static int write_block_cnt   = 0;
 static int line_count        = 0;
 static int total_write_times = 0;
 static int wait_system_server_start_time = NORAML_BOOT_WAIT_SS_TIME;
-
+static int is_timeout = 0;
 
 struct kernel_log_thread_header
 {
@@ -93,6 +93,7 @@ int wb_kernel_log(struct block_device *bdev, char *buf, char *line_buf)
 	struct kvec iov;
 	struct iov_iter iter;
 	struct kiocb kiocb;
+	struct inode *inode = NULL;
 
 	bool isforcewb = false; // write once per 0.5 sec PER_LOOP_MSEC
 	bool isfull = false;    // buf is full
@@ -102,7 +103,7 @@ int wb_kernel_log(struct block_device *bdev, char *buf, char *line_buf)
 	size_t len = 0;
 	int ret = 0;
 	int old_block_cnt = 0;
-	int boot_res = 1;       // 0: init success 1: fail
+	int boot_res = 0;       // 0: init success 1: fail
 
 	memset(&dev_map_file, 0, sizeof(struct file));
 	dev_map_file.f_mapping = bdev->bd_inode->i_mapping;
@@ -110,6 +111,7 @@ int wb_kernel_log(struct block_device *bdev, char *buf, char *line_buf)
 	dev_map_file.f_inode = bdev->bd_inode;
 
 	init_sync_kiocb(&kiocb, &dev_map_file);
+	inode = file_inode(&dev_map_file);
 	kiocb.ki_pos = wb_start_offset; //start wb offset
 
 	memset(&kmsg_dumper, 0, sizeof(struct kmsg_dumper));
@@ -119,6 +121,7 @@ int wb_kernel_log(struct block_device *bdev, char *buf, char *line_buf)
 
 	while (loop_cnt < MAX_STOP_CNT)  // 180S timeout
 	{
+		is_timeout = 0;
 		while (kmsg_dump_get_line(&kmsg_dumper, true, line_buf, BUF_SIZE_OF_LINE, &len))
 		{
 			if(((temp_size + len) >= WB_BLOCK_SIZE)) {
@@ -166,7 +169,7 @@ int wb_kernel_log(struct block_device *bdev, char *buf, char *line_buf)
 				if (phx_is_system_server_init_start()) {
 					oprkl_info_print("system_server init ready, stop record\n");
 					//it mean kernel ~ native boot complete
-					boot_res = 0;
+					boot_res = 1;
 					goto FINISH;
 				}
 			}
@@ -184,6 +187,7 @@ int wb_kernel_log(struct block_device *bdev, char *buf, char *line_buf)
 		msleep_interruptible(PER_LOOP_MSEC); // update once per 0.5 sec
 		isforcewb = true;
 	}
+	is_timeout = 1;
 	oprkl_info_print("system_server init not ready before timeout\n");
 
 FINISH:
@@ -407,10 +411,9 @@ int init_header(struct block_device *bdev, struct kernel_log_thread_header *head
 		if (head->is_monitoring == phoenix2_monitor_magic) {
 			oprkl_err_print("Last boot, not complete need feedback\n");
 			head->is_needfeedback = phoenix2_feedback_magic;
-			head->nobootcount = head->last_bootcount;
 			head->is_monitoring = 0;
-			head->last_bootcount = 0;
 		}
+		head->nobootcount = head->last_bootcount;
 		head->bootcount++;
 	} else {
 		oprkl_info_print("No match ,The boot is first boot, need init\n");
@@ -419,7 +422,7 @@ int init_header(struct block_device *bdev, struct kernel_log_thread_header *head
 	}
 	if (is_need_monitored()) {
 		oprkl_info_print("The boot is normal boot, need monitor\n");
-		head->is_monitoring = phoenix2_monitor_magic;
+		head->is_monitoring = 0;
 		head->last_bootcount = head->bootcount;
 	}
 	ret = write_header(bdev, head, sizeof(struct kernel_log_thread_header), KERNEL_HEAD_OFFSET);
@@ -427,7 +430,7 @@ int init_header(struct block_device *bdev, struct kernel_log_thread_header *head
 	return ret;
 }
 
-int clear_monitor_header_flag(struct block_device *bdev, struct kernel_log_thread_header *head)
+int set_monitor_header_flag(struct block_device *bdev, struct kernel_log_thread_header *head)
 {
 	int ret = 0;
 
@@ -437,14 +440,15 @@ int clear_monitor_header_flag(struct block_device *bdev, struct kernel_log_threa
 		oprkl_info_print("Record completed, But read header fail\n");
 		return ret;
 	}
-	head->is_monitoring = 0;
-	head->last_bootcount = 0;
+	head->is_monitoring = phoenix2_monitor_magic;
+	head->last_bootcount = head->bootcount;
+	oprkl_info_print("monitor flag: %d\n", head->is_monitoring );
 	ret = write_header(bdev, head, sizeof(struct kernel_log_thread_header), KERNEL_HEAD_OFFSET);
 	if (ret) {
 		oprkl_info_print("Record completed, But write header fail\n");
 		return ret;
 	}
-	oprkl_info_print("Record completed, clear monitor flag\n");
+	oprkl_info_print("Record completed, set monitor flag\n");
 	return 0;
 }
 
@@ -489,14 +493,7 @@ static int reserve_log_main(void *arg)
 	oprkl_info_print("Write back start offset %llu\n", wb_start_offset);
 
 	ret = wb_kernel_log(bdev, data_buf, line_buf);
-	if (!ret && phx_is_system_server_init_start())
-	{
-		if (clear_monitor_header_flag(bdev, &kernel_head))
-		{
-			oprkl_err_print("clear_monitor_header_flag failed\n");
-		}
-	}
-	else
+	if (!ret)
 	{
 		/* give abnormal boot another timeslice */
 		if (phx_is_long_time()) {
@@ -504,11 +501,11 @@ static int reserve_log_main(void *arg)
 		}
 		oprkl_info_print("wait again system server start time : %d\n", wait_system_server_start_time);
 		schedule_timeout_interruptible(wait_system_server_start_time * HZ);
-		if (phx_is_system_server_init_start())
+		if ( (is_need_monitored()) && !phx_is_system_server_init_start() && is_timeout)
 		{
-			if (clear_monitor_header_flag(bdev, &kernel_head))
+			if (set_monitor_header_flag(bdev, &kernel_head))
 			{
-				oprkl_err_print("clear_monitor_header_flag failed\n");
+				oprkl_err_print("set_monitor_header_flag failed\n");
 			}
 		}
 	}

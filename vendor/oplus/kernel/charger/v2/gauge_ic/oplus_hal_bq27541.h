@@ -285,6 +285,16 @@
 #define BQ28Z610_TERM_VOLT_CHECK_SIZE		6
 #define BQ28Z610_DEEP_DISCHG_SHIFT_MASK		8
 
+#define BQ28Z610_BATT_SN_EN_ADDR		0x3E
+#define BQ28Z610_BATT_SN_CMD			0x004C
+#define BQ28Z610_BATT_SN_READ_BUF_LEN		22
+#define BQ28Z610_BATT_SN_NO_CHECKSUM		0x00
+#define BQ28Z610_BATT_SN_RETRY_MAX		3
+
+#define ZY0602_BATT_SN_EN_ADDR			0x3F
+#define ZY0602_BATT_SN_READ_ADDR		0x40
+#define ZY0602_BATT_SN_READ_BUF_LEN		32
+
 #define ZY0603_CMDMASK_ALTMAC_R			0x08000000
 #define ZY0603_CMDMASK_ALTMAC_W			0x88000000
 #define ZY0603_FWVERSION			0x0002
@@ -582,6 +592,7 @@ struct chip_bq27541 {
 #if IS_ENABLED(CONFIG_OPLUS_CHG_TEST_KIT)
 	struct test_feature *battery_id_gpio_test;
 #endif
+	struct battery_manufacture_info battinfo;
 };
 
 extern bool oplus_gauge_ic_chip_is_null(

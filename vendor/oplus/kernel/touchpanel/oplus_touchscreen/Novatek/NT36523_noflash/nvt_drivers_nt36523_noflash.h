@@ -143,65 +143,65 @@
 #define STATUS_FINGER_FOD    0x03
 
 typedef enum {
-    NVT_RAWDATA,    //raw data
-    NVT_DIFFDATA,   //diff data
-    NVT_BASEDATA,   //baseline data
-    NVT_DEBUG_FINGER_DOWN_DIFFDATA,   //debug finger diff (finger down)
-    NVT_DEBUG_STATUS_CHANGE_DIFFDATA, //debug finger diff (status change)
+	NVT_RAWDATA,    //raw data
+	NVT_DIFFDATA,   //diff data
+	NVT_BASEDATA,   //baseline data
+	NVT_DEBUG_FINGER_DOWN_DIFFDATA,   //debug finger diff (finger down)
+	NVT_DEBUG_STATUS_CHANGE_DIFFDATA, //debug finger diff (status change)
 } DEBUG_READ_TYPE;
 
 typedef enum {
-    EDGE_REJECT_L = 0,
-    EDGE_REJECT_H = 1,
-    PWR_FLAG = 2,
-    HOPPING_FIX_FREQ_FLAG = 3,
-    HOPPING_POLLING_FLAG = 4,
-    JITTER_FLAG = 6,
-    HEADSET_FLAG = 7
+	EDGE_REJECT_L = 0,
+	EDGE_REJECT_H = 1,
+	PWR_FLAG = 2,
+	HOPPING_FIX_FREQ_FLAG = 3,
+	HOPPING_POLLING_FLAG = 4,
+	JITTER_FLAG = 6,
+	HEADSET_FLAG = 7
 } CMD_OFFSET;
 
 typedef enum {
-    DEBUG_DIFFDATA_FLAG = 0,
-    DEBUG_WKG_COORD_FLAG = 1,
-    DEBUG_WKG_COORD_RECORD_FLAG = 2,
-    DEBUG_WATER_POLLING_FLAG = 3
+	DEBUG_DIFFDATA_FLAG = 0,
+	DEBUG_WKG_COORD_FLAG = 1,
+	DEBUG_WKG_COORD_RECORD_FLAG = 2,
+	DEBUG_WATER_POLLING_FLAG = 3
 } CMD_EXTEND_OFFSET;
 
 typedef enum {
-    EVENT_MAP_HOST_CMD                      = 0x50,
-    EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE   = 0x51,
-    EVENT_MAP_RESET_COMPLETE                = 0x60,
-    EVENT_MAP_FWINFO                        = 0x78,
-    EVENT_MAP_PROJECTID                     = 0x9A,
+	EVENT_MAP_HOST_CMD                      = 0x50,
+	EVENT_MAP_HANDSHAKING_or_SUB_CMD_BYTE   = 0x51,
+	EVENT_MAP_RESET_COMPLETE                = 0x60,
+	EVENT_MAP_FWINFO                        = 0x78,
+	EVENT_MAP_PROJECTID                     = 0x9A,
 } SPI_EVENT_MAP;
 
 typedef enum {
-    RESET_STATE_INIT = 0xA0,// IC reset
-    RESET_STATE_REK,                // ReK baseline
-    RESET_STATE_REK_FINISH, // baseline is ready
-    RESET_STATE_NORMAL_RUN, // normal run
-    RESET_STATE_MAX  = 0xAF
+	RESET_STATE_INIT = 0xA0,// IC reset
+	RESET_STATE_REK,                // ReK baseline
+	RESET_STATE_REK_FINISH, // baseline is ready
+	RESET_STATE_NORMAL_RUN, // normal run
+	RESET_STATE_MAX  = 0xAF
 } RST_COMPLETE_STATE;
 
 typedef enum {
-    NVT_MP_PASS = 0,
-    NVT_MP_FAIL = 1,
-    NVT_MP_FAIL_READ_DATA = 2,
-    NVT_MP_UNKNOW = 3
+	NVT_MP_PASS = 0,
+	NVT_MP_FAIL = 1,
+	NVT_MP_FAIL_READ_DATA = 2,
+	NVT_MP_UNKNOW = 3
 } NVT_MP_TEST_RESULT;
 
 struct nvt_ts_mem_map {
-    uint32_t EVENT_BUF_ADDR;
-    uint32_t RAW_PIPE0_ADDR;
-    uint32_t RAW_PIPE1_ADDR;
-    uint32_t BASELINE_ADDR;
-    uint32_t BASELINE_BTN_ADDR;
-    uint32_t DIFF_PIPE0_ADDR;
-    uint32_t DIFF_PIPE1_ADDR;
-    uint32_t RAW_BTN_PIPE0_ADDR;
-    uint32_t RAW_BTN_PIPE1_ADDR;
-    uint32_t DIFF_BTN_PIPE0_ADDR;
-    uint32_t DIFF_BTN_PIPE1_ADDR;
+	uint32_t EVENT_BUF_ADDR;
+	uint32_t RAW_PIPE0_ADDR;
+	uint32_t RAW_PIPE1_ADDR;
+	uint32_t BASELINE_ADDR;
+	uint32_t BASELINE_BTN_ADDR;
+	uint32_t DIFF_PIPE0_ADDR;
+	uint32_t DIFF_PIPE1_ADDR;
+	uint32_t RAW_BTN_PIPE0_ADDR;
+	uint32_t RAW_BTN_PIPE1_ADDR;
+	uint32_t DIFF_BTN_PIPE0_ADDR;
+	uint32_t DIFF_BTN_PIPE1_ADDR;
 	uint32_t PEN_2D_BL_TIP_X_ADDR;
 	uint32_t PEN_2D_BL_TIP_Y_ADDR;
 	uint32_t PEN_2D_BL_RING_X_ADDR;
@@ -218,131 +218,138 @@ struct nvt_ts_mem_map {
 	uint32_t PEN_1D_DIFF_TIP_Y_ADDR;
 	uint32_t PEN_1D_DIFF_RING_X_ADDR;
 	uint32_t PEN_1D_DIFF_RING_Y_ADDR;
-    uint32_t READ_FLASH_CHECKSUM_ADDR;
-    uint32_t RW_FLASH_DATA_ADDR;
-    /* Phase 2 Host Download */
-    uint32_t BOOT_RDY_ADDR;
-    uint32_t POR_CD_ADDR;
+	uint32_t READ_FLASH_CHECKSUM_ADDR;
+	uint32_t RW_FLASH_DATA_ADDR;
+	/* Phase 2 Host Download */
+	uint32_t BOOT_RDY_ADDR;
+	uint32_t POR_CD_ADDR;
 	uint32_t TX_AUTO_COPY_EN;
 	uint32_t SPI_DMA_TX_INFO;
-    /* BLD CRC */
-    uint32_t BLD_LENGTH_ADDR;
-    uint32_t ILM_LENGTH_ADDR;
-    uint32_t DLM_LENGTH_ADDR;
-    uint32_t BLD_DES_ADDR;
-    uint32_t ILM_DES_ADDR;
-    uint32_t DLM_DES_ADDR;
-    uint32_t G_ILM_CHECKSUM_ADDR;
-    uint32_t G_DLM_CHECKSUM_ADDR;
-    uint32_t R_ILM_CHECKSUM_ADDR;
-    uint32_t R_DLM_CHECKSUM_ADDR;
-    uint32_t BLD_CRC_EN_ADDR;
-    uint32_t DMA_CRC_EN_ADDR;
-    uint32_t BLD_ILM_DLM_CRC_ADDR;
-    uint32_t DMA_CRC_FLAG_ADDR;
-    uint32_t DOZE_GM_S1D_SCAN_RAW_ADDR;
-    uint32_t DOZE_GM_BTN_SCAN_RAW_ADDR;
+	/* BLD CRC */
+	uint32_t BLD_LENGTH_ADDR;
+	uint32_t ILM_LENGTH_ADDR;
+	uint32_t DLM_LENGTH_ADDR;
+	uint32_t BLD_DES_ADDR;
+	uint32_t ILM_DES_ADDR;
+	uint32_t DLM_DES_ADDR;
+	uint32_t G_ILM_CHECKSUM_ADDR;
+	uint32_t G_DLM_CHECKSUM_ADDR;
+	uint32_t R_ILM_CHECKSUM_ADDR;
+	uint32_t R_DLM_CHECKSUM_ADDR;
+	uint32_t BLD_CRC_EN_ADDR;
+	uint32_t DMA_CRC_EN_ADDR;
+	uint32_t BLD_ILM_DLM_CRC_ADDR;
+	uint32_t DMA_CRC_FLAG_ADDR;
+	uint32_t DOZE_GM_S1D_SCAN_RAW_ADDR;
+	uint32_t DOZE_GM_BTN_SCAN_RAW_ADDR;
 };
 
 struct nvt_ts_bin_map {
-    char name[12];
-    uint32_t BIN_addr;
-    uint32_t SRAM_addr;
-    uint32_t size;
-    uint32_t crc;
+	char name[12];
+	uint32_t BIN_addr;
+	uint32_t SRAM_addr;
+	uint32_t size;
+	uint32_t crc;
+};
+
+struct pen_id_map {
+	uint32_t src_id;
+	uint32_t dst_id;
 };
 
 struct nvt_ts_trim_id_table {
-    uint8_t id[NVT_ID_BYTE_MAX];
-    uint8_t mask[NVT_ID_BYTE_MAX];
-    const struct nvt_ts_mem_map *mmap;
-    uint8_t carrier_system;
-    uint8_t support_hw_crc;
+	uint8_t id[NVT_ID_BYTE_MAX];
+	uint8_t mask[NVT_ID_BYTE_MAX];
+	const struct nvt_ts_mem_map *mmap;
+	uint8_t carrier_system;
+	uint8_t support_hw_crc;
 };
 
 struct nvt_ts_firmware {
-    size_t size;
-    const u8 *data;
+	size_t size;
+	const u8 *data;
 };
 
 struct nvt_fw_debug_info {
-    uint8_t rek_info;
-    uint8_t rst_info;
-    uint8_t hopping;
-    uint8_t esd;
-    uint8_t palm;
-    uint8_t bending;
-    uint8_t water;
-    uint8_t gnd;
-    uint8_t er;
-    uint8_t fog;
-    uint8_t film;
-    uint8_t notch;
+	uint8_t rek_info;
+	uint8_t rst_info;
+	uint8_t hopping;
+	uint8_t esd;
+	uint8_t palm;
+	uint8_t bending;
+	uint8_t water;
+	uint8_t gnd;
+	uint8_t er;
+	uint8_t fog;
+	uint8_t film;
+	uint8_t notch;
 };
 
 struct chip_data_nt36523 {
-    bool                            is_sleep_writed;
+	bool                            is_sleep_writed;
 	bool                            pen_support;
-    bool                            *is_pen_attracted;
-    bool                            *is_pen_connected;
-    char                            *fw_name;
-    char                            *test_limit_name;
-    struct firmware_headfile        *p_firmware_headfile;
-    tp_dev                          tp_type;
+	bool                            *is_pen_attracted;
+	bool                            *is_pen_connected;
+	char                            *fw_name;
+	char                            *test_limit_name;
+	struct firmware_headfile        *p_firmware_headfile;
+	tp_dev                          tp_type;
 	uint8_t                         point_data[POINT_DATA_LEN + 2];
-    uint8_t                         fw_ver;
-    uint8_t                         fw_sub_ver;
-    uint8_t                         recovery_cnt;
-    uint8_t                         ilm_dlm_num;
-    uint8_t                         cascade_2nd_header_info;
-    uint8_t                         *fwbuf;
-    uint16_t                        nvt_pid;
-    uint32_t                        ENG_RST_ADDR;
-    uint32_t                        partition;
-    struct spi_device               *s_client;
-    struct hw_resource              *hw_res;
-    struct nvt_ts_trim_id_table     trim_id_table;
-    struct nvt_ts_bin_map           *bin_map;
-    bool                            esd_check_enabled;
+	uint8_t                         fw_ver;
+	uint8_t                         fw_sub_ver;
+	uint8_t                         recovery_cnt;
+	uint8_t                         ilm_dlm_num;
+	uint8_t                         cascade_2nd_header_info;
+	uint8_t                         *fwbuf;
+	uint16_t                        nvt_pid;
+	uint32_t                        ENG_RST_ADDR;
+	uint32_t                        partition;
+	struct spi_device               *s_client;
+	struct hw_resource              *hw_res;
+	struct nvt_ts_trim_id_table     trim_id_table;
+	struct pen_id_map               *pen_id_map_array;
+	struct nvt_ts_bin_map           *bin_map;
+	bool                            esd_check_enabled;
 	bool                            dev_pm_suspend;
-    unsigned long                   irq_timer;
-    uint8_t                         esd_retry;
-    struct device                   *dev;
-    struct completion      dev_pm_resume_completion;
-    //const struct firmware           *g_fw;
+	unsigned long                   irq_timer;
+	uint8_t                         esd_retry;
+	struct device                   *dev;
+	struct completion      dev_pm_resume_completion;
+	//const struct firmware           *g_fw;
 #ifdef CONFIG_TOUCHPANEL_MTK_PLATFORM
 #ifdef CONFIG_SPI_MT65XX
-    struct mtk_chip_config          spi_ctrl;
+	struct mtk_chip_config          spi_ctrl;
 #else
-    struct mt_chip_conf             spi_ctrl;
+	struct mt_chip_conf             spi_ctrl;
 #endif
 #endif // end of CONFIG_TOUCHPANEL_MTK_PLATFORM
-    uint8_t                         touch_direction;    //show touchpanel current direction
-    struct mutex                    mutex_testing;
-    int                             probe_done;
-    bool                            using_headfile;
-    int                             lcd_reset_gpio;
+	uint8_t                         touch_direction;    //show touchpanel current direction
+	struct mutex                    mutex_testing;
+	int                             probe_done;
+	bool                            using_headfile;
+	int                             lcd_reset_gpio;
 	int                             cs_gpio;
-    struct nvt_fw_debug_info        nvt_fw_debug_info;
-    int irq_num;
+	struct nvt_fw_debug_info        nvt_fw_debug_info;
+	int irq_num;
+	int pen_id_map_num;
 	int cs_gpio_need_pull;
-    struct touchpanel_data *ts;
-    u8 *g_fw_buf;
-    size_t g_fw_len;
-    bool g_fw_sta;
-    u8 *fw_buf_dma;
-    bool need_judge_irq_throw;
-    int gesture_state;
+	struct touchpanel_data *ts;
+	u8 *g_fw_buf;
+	size_t g_fw_len;
+	bool g_fw_sta;
+	u8 *fw_buf_dma;
+	bool need_judge_irq_throw;
+	int gesture_state;
 #ifdef CONFIG_OPLUS_TP_APK
 
-    bool lock_point_status;
-    bool plug_status;
-    bool debug_mode_sta;
-    bool debug_gesture_sta;
-    bool earphone_sta;
-    bool charger_sta;
-    bool noise_sta;
-    int water_sta;
+	bool lock_point_status;
+	bool plug_status;
+	bool debug_mode_sta;
+	bool debug_gesture_sta;
+	bool earphone_sta;
+	bool charger_sta;
+	bool noise_sta;
+	int water_sta;
 #endif //end of CONFIG_OPLUS_TP_APK
 };
 

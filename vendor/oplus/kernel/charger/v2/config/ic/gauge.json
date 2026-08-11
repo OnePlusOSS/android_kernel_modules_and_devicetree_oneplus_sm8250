@@ -1824,7 +1824,46 @@
                     }
                 }
             }
+        },
+        {
+            "lable": "OPLUS_IC_FUNC_GAUGE_GET_BATT_SN",
+            "desc": {
+                "zh": "获取电池Serial Number"
+            },
+            "auto_debug_code": false,
+            "parameter_list": ["char[]", "int"],
+            "parameter_desc": [
+                {
+                    "range": "字符串",
+                    "type": "out",
+                    "desc": {
+                        "zh": "用于接收输出结果的buf"
+                    }
+                },
+                {
+                    "range": "N/A",
+                    "type": "in",
+                    "desc": {
+                        "zh": "参数0对应的buf长度"
+                    }
+                }
+            ],
+            "vict": {
+                "read": {
+                    "cmd": "vict -f {id} -G vic-*",
+                    "desc": {
+                        "zh": "返回电池Serial Number字符串"
+                    }
+                },
+                "write": false,
+                "overwrite": {
+                    "cmd": "vict -f {id} -O {val} vic-*",
+                    "desc": {
+                        "zh": "N/A"
+                    }
+                }
+            }
         }
     ],
-    "version": "V2.1:60:ea6748d804fb6269510e07b1cfbad19902fc134bb91f4692b97fe66fa0b81037"
+    "version": "V2.1:61:a67a37eec972e408c22c0ccb4186c573ccfa02397ccaabbaefd35885434c07ce"
 }

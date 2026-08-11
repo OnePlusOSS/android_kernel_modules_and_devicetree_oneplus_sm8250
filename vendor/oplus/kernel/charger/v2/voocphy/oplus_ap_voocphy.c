@@ -5347,7 +5347,8 @@ static int oplus_voocphy_commu_process_handle(struct device *dev, unsigned long 
 
 	/* note exception for systrace */
 	voocphy_info("dur time %lld usecs\n", duration);
-	if (oplus_chglib_is_abnormal_pd_svooc_adapter(chip->dev) &&
+	if ((oplus_chglib_is_abnormal_pd_svooc_adapter(chip->dev) ||
+		(oplus_chglib_get_adapter_sid_power(chip->dev) >= 80)) &&
 	    oplus_chglib_is_wired_present(chip->dev)) {
 		voocphy_info("delay_notify_ap true");
 		delay_notify_ap = true;

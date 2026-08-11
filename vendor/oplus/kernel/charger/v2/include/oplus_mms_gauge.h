@@ -38,6 +38,11 @@ enum gauge_type_id {
 	DEVICE_ZY0603,
 };
 
+#define OPLUS_BATT_SERIAL_NUM_SIZE 20
+struct battery_manufacture_info {
+	char batt_serial_num[OPLUS_BATT_SERIAL_NUM_SIZE];
+};
+
 int oplus_gauge_get_batt_mvolts(void);
 int oplus_gauge_get_batt_fc(void);
 int oplus_gauge_get_batt_qm(void);
@@ -105,4 +110,5 @@ void oplus_gauge_set_deep_dischg_count(struct oplus_mms *topic, int count);
 int oplus_gauge_show_deep_dischg_count(struct oplus_mms *topic);
 void oplus_gauge_set_deep_count_cali(struct oplus_mms *topic, int val);
 int oplus_gauge_get_deep_count_cali(struct oplus_mms *topic);
+int oplus_gauge_get_battinfo_sn(struct oplus_mms *topic, char *sn_buff, int size_buffer);
 #endif /* __OPLUS_MMS_GAUGE_H__ */

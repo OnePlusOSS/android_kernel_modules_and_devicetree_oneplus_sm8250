@@ -629,6 +629,7 @@ struct oplus_chg_track {
 	struct delayed_work chg_into_liquid_trigger_work_timeout;
 	struct delayed_work plugout_state_work;
 	struct delayed_work dual_chan_err_load_trigger_work;
+	struct delayed_work wired_online_err_trigger_work;
 
 	oplus_chg_track_trigger *mmi_chg_info_trigger;
 	oplus_chg_track_trigger *slow_chg_info_trigger;
@@ -636,6 +637,7 @@ struct oplus_chg_track {
 	oplus_chg_track_trigger *wls_info_trigger;
 	oplus_chg_track_trigger *ufcs_info_trigger;
 	oplus_chg_track_trigger *deep_dischg_info_trigger;
+	oplus_chg_track_trigger *wired_online_err_trigger;
 
 	struct delayed_work mmi_chg_info_trigger_work;
 	struct delayed_work slow_chg_info_trigger_work;
@@ -774,6 +776,7 @@ static struct flag_reason_table track_flag_reason_table[] = {
 	{ TRACK_NOTIFY_FLAG_FASTCHG_START_ABNORMAL, "FastchgStartClearError" },
 	{ TRACK_NOTIFY_FLAG_DUAL_CHAN_ABNORMAL, "DualChanAbnormal" },
 	{ TRACK_NOTIFY_FLAG_DUMMY_START_ABNORMAL, "DummyStartClearError" },
+	{ TRACK_NOTIFY_FLAG_WIRED_ONLINE_ERROR, "WiredOnlineStatusError" },
 };
 #endif
 
@@ -2881,6 +2884,41 @@ static void oplus_chg_track_deep_dischg_info_trigger_work(struct work_struct *wo
 	mutex_unlock(&chip->deep_dischg_info_lock);
 }
 
+static void oplus_chg_track_wired_online_err_trigger_work(struct work_struct *work)
+{
+	struct delayed_work *dwork = to_delayed_work(work);
+	struct oplus_chg_track *chip = container_of(
+		dwork, struct oplus_chg_track, wired_online_err_trigger_work);
+	int index = 0;
+
+	if (!chip)
+		return;
+
+	if (chip->wired_online_err_trigger)
+		kfree(chip->wired_online_err_trigger);
+
+	chip->wired_online_err_trigger = kzalloc(sizeof(oplus_chg_track_trigger), GFP_KERNEL);
+	if (!chip->wired_online_err_trigger) {
+		chg_err("wired_online_err_trigger memery alloc fail\n");
+		return;
+	}
+
+	chip->wired_online_err_trigger->type_reason = TRACK_NOTIFY_TYPE_SOFTWARE_ABNORMAL;
+	chip->wired_online_err_trigger->flag_reason = TRACK_NOTIFY_FLAG_WIRED_ONLINE_ERROR;
+
+	oplus_chg_track_obtain_power_info(&(chip->wired_online_err_trigger->crux_info[index]),
+					  OPLUS_CHG_TRACK_CURX_INFO_LEN - index);
+	oplus_chg_track_upload_trigger_data(*(chip->wired_online_err_trigger));
+	kfree(chip->wired_online_err_trigger);
+	chip->wired_online_err_trigger = NULL;
+}
+
+void oplus_chg_track_upload_wired_online_err_info(struct oplus_monitor *monitor)
+{
+	if (monitor->track != NULL)
+		schedule_delayed_work(&monitor->track->wired_online_err_trigger_work, 0);
+}
+
 static int oplus_chg_track_speed_ref_init(struct oplus_chg_track *chip)
 {
 	if (!chip)
@@ -3167,6 +3205,7 @@ static int oplus_chg_track_init(struct oplus_chg_track *track_dev)
 	INIT_DELAYED_WORK(&chip->wls_info_trigger_work, oplus_chg_track_wls_info_trigger_work);
 	INIT_DELAYED_WORK(&chip->ufcs_info_trigger_work, oplus_chg_track_ufcs_info_trigger_work);
 	INIT_DELAYED_WORK(&chip->deep_dischg_info_trigger_work, oplus_chg_track_deep_dischg_info_trigger_work);
+	INIT_DELAYED_WORK(&chip->wired_online_err_trigger_work, oplus_chg_track_wired_online_err_trigger_work);
 
 	return ret;
 }

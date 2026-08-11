@@ -24,6 +24,7 @@
 #include <oplus_chg_ic.h>
 
 #ifdef OPLUS_FEATURE_CHG_BASIC
+#include <oplus_mms_gauge.h>
 #ifndef CONFIG_FB
 #define CONFIG_FB
 #endif
@@ -146,6 +147,7 @@ enum oplus_ap_message_id {
 	AP_MESSAGE_ACK,
 	AP_MESSAGE_GET_GAUGE_REG_INFO,
 	AP_MESSAGE_GET_GAUGE_CALIB_TIME,
+	AP_MESSAGE_GET_GAUGE_BATTINFO,
 	AP_MESSAGE_MAX_SIZE = 32,
 };
 #endif
@@ -636,6 +638,7 @@ struct battery_chg_dev {
 
 	struct regmap *regmap;
 	struct delayed_work get_regmap_work;
+	struct battery_manufacture_info battinfo;
 #endif
 };
 

@@ -435,7 +435,7 @@ void *oplus_chg_ic_get_item_data_addr(void *buf, int index)
 	return (void *)item->buf;
 }
 
-int oplus_chg_ic_get_item_data_size(void *buf, int index)
+int oplus_chg_ic_get_item_data_size(const void *buf, int index)
 {
 	struct oplus_chg_ic_func_date *debug_data;
 	struct oplus_chg_ic_func_date_item *item;

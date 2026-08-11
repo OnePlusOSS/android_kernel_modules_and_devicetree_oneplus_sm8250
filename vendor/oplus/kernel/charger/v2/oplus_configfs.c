@@ -509,6 +509,24 @@ static ssize_t smartchg_soh_support_show(struct device *dev, struct device_attri
 }
 static DEVICE_ATTR_RO(smartchg_soh_support);
 
+static ssize_t battery_sn_show(struct device *dev, struct device_attribute *attr,
+			      char *buf)
+{
+	int len = 0;
+	int ret = 0;
+	char batt_sn[OPLUS_BATT_SERIAL_NUM_SIZE * 2] = {"\0"};
+	struct oplus_configfs_device *chip = dev->driver_data;
+
+	ret = oplus_gauge_get_battinfo_sn(chip->gauge_topic, batt_sn, sizeof(batt_sn));
+	if (ret < 0)
+		chg_err("get battery sn error");
+	else
+		len = sprintf(buf, "%s\n", batt_sn);
+
+	return len;
+}
+static DEVICE_ATTR_RO(battery_sn);
+
 #ifdef CONFIG_OPLUS_CALL_MODE_SUPPORT
 static ssize_t call_mode_show(struct device *dev, struct device_attribute *attr,
 			      char *buf)
@@ -1525,6 +1543,7 @@ static struct device_attribute *oplus_battery_attributes[] = {
 	&dev_attr_pkg_name,
 	&dev_attr_dual_chan_info,
 	&dev_attr_slow_chg_en,
+	&dev_attr_battery_sn,
 	NULL
 };
 

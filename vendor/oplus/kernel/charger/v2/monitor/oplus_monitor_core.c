@@ -683,6 +683,9 @@ static void oplus_monitor_wired_subs_callback(struct mms_subscribe *subs,
 						false);
 			chip->pd_svooc = !!data.intval;
 			break;
+		case WIRED_ITEM_ONLINE_STATUS_ERR:
+			oplus_chg_track_upload_wired_online_err_info(chip);
+			break;
 		default:
 			break;
 		}

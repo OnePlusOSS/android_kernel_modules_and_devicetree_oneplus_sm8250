@@ -84,7 +84,7 @@ void locking_init_rq_data(struct rq *rq)
 	rq->rq_locking_task = 0;
 }
 
-static inline bool test_task_is_rt(struct task_struct *p)
+inline bool test_task_is_rt(struct task_struct *p)
 {
 	/* valid RT priority is 0..MAX_RT_PRIO-1 */
 	return (p->prio >= 0) && (p->prio <= MAX_RT_PRIO-1);

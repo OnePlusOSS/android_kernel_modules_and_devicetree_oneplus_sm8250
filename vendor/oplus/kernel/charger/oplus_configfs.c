@@ -2688,6 +2688,40 @@ static ssize_t deep_dischg_count_cali_store(struct device *dev, struct device_at
 }
 static DEVICE_ATTR_RW(deep_dischg_count_cali);
 
+static ssize_t dec_delta_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	struct oplus_configfs_device *chip = dev->driver_data;
+	int counts = 0;
+
+	if (!chip) {
+		chg_err("chip is NULL\n");
+		return -EINVAL;
+	}
+	counts = oplus_charger_get_dec_delta();
+	return sprintf(buf, "%d\n", counts);
+}
+
+static ssize_t dec_delta_store(struct device *dev, struct device_attribute *attr,
+					const char *buf, size_t count)
+{
+	struct oplus_configfs_device *chip = dev->driver_data;
+	int val = 0;
+
+	if (!chip) {
+		chg_err("chip is NULL\n");
+		return -EINVAL;
+	}
+
+	if (kstrtos32(buf, 0, &val)) {
+		chg_err("buf error\n");
+		return -EINVAL;
+	}
+	oplus_charger_set_dec_delta(val);
+
+	return count;
+}
+static DEVICE_ATTR_RW(dec_delta);
+
 static struct device_attribute *oplus_common_attributes[] = {
 #ifdef OPLUS_CHG_ADB_ROOT_ENABLE
 	&dev_attr_charge_parameter,
@@ -2704,6 +2738,7 @@ static struct device_attribute *oplus_common_attributes[] = {
 	&dev_attr_battlog_push_config,
 	&dev_attr_deep_dischg_counts,
 	&dev_attr_deep_dischg_count_cali,
+	&dev_attr_dec_delta,
 	NULL
 };
 #ifdef OPLUS_FEATURE_CHG_BASIC

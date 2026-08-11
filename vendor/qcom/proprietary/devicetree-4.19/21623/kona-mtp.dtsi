@@ -579,6 +579,8 @@
 		// focalt x8 resolution config
 		high_resolution_support;
 		high_resolution_support_x8;
+		switch_game_rate_support;
+		report_rate_game_value = <1>;
 		touchpanel,button-type = <4>;
 		touchpanel.button-TRx = <0 0>;
 	};
