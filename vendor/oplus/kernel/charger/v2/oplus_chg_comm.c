@@ -4944,34 +4944,8 @@ int read_unsigned_data_from_node(struct device_node *node,
 
 static void oplus_comm_parse_aging_ffc_dt(struct oplus_chg_comm *comm_dev)
 {
-	struct device_node *node = comm_dev->dev->of_node;
-	struct oplus_comm_spec_config *spec = &comm_dev->spec;
-	int rc;
+	comm_dev->spec.wired_aging_ffc_version = AGING_FFC_NOT_SUPPORT;
 
-	rc = of_property_read_u32(
-		node, "oplus_spec,wired-aging-ffc-version",
-		&spec->wired_aging_ffc_version);
-	if (rc < 0) {
-		chg_info("wired-aging-ffc not support\n");
-		spec->wired_aging_ffc_version = AGING_FFC_NOT_SUPPORT;
-		return;
-	}
-	rc = read_unsigned_data_from_node(node, "oplus_spec,wired-aging-ffc-offset-mv",
-					  (u32 *)spec->wired_aging_ffc_offset_mv,
-					  AGAIN_FFC_CYCLY_THR_COUNT * spec->wired_ffc_step_max);
-	if (rc < 0) {
-		chg_err("get oplus_spec,wired-aging-ffc-offset-mv error, rc=%d\n", rc);
-		spec->wired_aging_ffc_version = AGING_FFC_NOT_SUPPORT;
-		return;
-	}
-	rc = read_unsigned_data_from_node(node, "oplus_spec,wired-aging-ffc-cycle-thr",
-					  (u32 *)spec->wired_aging_ffc_cycle_thr,
-					  AGAIN_FFC_CYCLY_THR_COUNT);
-	if (rc < 0) {
-		chg_err("get oplus_spec,wired-aging-ffc-cycle-thr error, rc=%d\n", rc);
-		spec->wired_aging_ffc_version = AGING_FFC_NOT_SUPPORT;
-		return;
-	}
 }
 
 static bool oplus_comm_reserve_soc_by_rus(struct oplus_chg_comm *chip)

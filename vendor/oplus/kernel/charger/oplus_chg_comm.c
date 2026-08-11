@@ -219,6 +219,7 @@ static int oplus_chg_get_dec_cv(void)
 		return dec_cv;
 	}
 	dec_cv = g_oplus_chip->dec_cv.dec_vol;
+
 	return dec_cv;
 }
 

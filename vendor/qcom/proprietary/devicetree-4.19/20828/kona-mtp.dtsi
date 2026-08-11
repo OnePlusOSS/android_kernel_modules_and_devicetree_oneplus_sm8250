@@ -1223,6 +1223,7 @@
 		status = "okay";
 		compatible = "oplus,mp2650-charger";
 		reg = <0x5c 0>;
+		support_icl_optimization;
 
 		qcom,mps_otg_en-gpio = <&pm8150_gpios 3 0x00>;
 		pinctrl-names = "mps_otg_en_active", "mps_otg_en_sleep", "mps_otg_en_default";
@@ -1480,6 +1481,8 @@
 			qcom,little_cool_vfloat_over_sw_limit = <4445>;
 			qcom,normal_vfloat_over_sw_limit = <4445>;
 			qcom,warm_vfloat_over_sw_limit = <4140>;
+
+			oplus_spec,dec-vol-fv-mv = <40>;
 
 			qcom,vbatt_power_off = <3300>;
 			qcom,vbatt_soc_1 = <3310>;

@@ -3611,19 +3611,6 @@ static void oplus_chg_track_chg_cycle_info_trigger_work(struct work_struct *work
 	mutex_unlock(&chip->chg_cycle_info_lock);
 }
 
-static void oplus_chg_track_dec_vol_info_trigger_work(struct work_struct *work)
-{
-	struct delayed_work *dwork = to_delayed_work(work);
-	struct oplus_chg_chip *chip = container_of(dwork, struct oplus_chg_chip, dec_vol_info_trigger_work);
-
-	if (chip->dec_vol_info_trigger) {
-		oplus_chg_track_upload_trigger_data(*(chip->dec_vol_info_trigger));
-		kfree(chip->dec_vol_info_trigger);
-		chip->dec_vol_info_trigger = NULL;
-	}
-	mutex_unlock(&chip->dec_vol_info_lock);
-}
-
 int oplus_chg_track_upload_mmi_chg_info(struct oplus_chg_chip *chip, int mmi_chg)
 {
 	int index = 0;
@@ -3712,6 +3699,19 @@ static int oplus_chg_track_upload_chg_cycle_info(struct oplus_chg_chip *chip, ch
 	schedule_delayed_work(&chip->chg_cycle_info_trigger_work, 0);
 	chg_info("success\n");
 	return 0;
+}
+
+static void oplus_chg_track_dec_vol_info_trigger_work(struct work_struct *work)
+{
+	struct delayed_work *dwork = to_delayed_work(work);
+	struct oplus_chg_chip *chip = container_of(dwork, struct oplus_chg_chip, dec_vol_info_trigger_work);
+
+	if (chip->dec_vol_info_trigger) {
+		oplus_chg_track_upload_trigger_data(*(chip->dec_vol_info_trigger));
+		kfree(chip->dec_vol_info_trigger);
+		chip->dec_vol_info_trigger = NULL;
+	}
+	mutex_unlock(&chip->dec_vol_info_lock);
 }
 
 #define TRACK_DEC_VOL_UPLOAD_COUNT_MAX 3
@@ -5962,10 +5962,7 @@ int oplus_chg_parse_charger_dt(struct oplus_chg_chip *chip)
 	charger_xlog_printk(CHG_LOG_CRTI, "qcom,suport_pd_9v2a = %d\n", chip->suport_pd_9v2a);
 
 	oplus_chg_smooth_switch_v2_parse_dt(chip);
-	rc = of_property_read_u32(node, "oplus,aging_ffc_version", &chip->aging_ffc_version);
-	if (rc) {
-		chip->aging_ffc_version = AGING_FFC_NOT_SUPPORT;
-	}
+	chip->aging_ffc_version = AGING_FFC_NOT_SUPPORT;
 
 	chip->support_wd0 = of_property_read_bool(node, "qcom,ccdetect_by_wd0");
 	chip->support_usbtemp_protect_v2 = of_property_read_bool(node, "qcom,support_usbtemp_protect_v2");

@@ -2698,6 +2698,7 @@ static ssize_t dec_delta_show(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 	}
 	counts = oplus_charger_get_dec_delta();
+
 	return sprintf(buf, "%d\n", counts);
 }
 
